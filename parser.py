@@ -2,7 +2,8 @@ from html.parser import HTMLParser
 from typing import Union, TypeVar
 
 from exceptions import MalformedHTMLException, ONEmSDKException
-from models import Node, SectionTag, FormTag
+from model.node import Node
+from model.tag import get_tag_cls, Tag
 
 
 class Stack:
@@ -73,18 +74,26 @@ class Parser(HTMLParser):
         last_tag_obj.add_child(data)
 
 
-def parse_html(filename: str) -> Union[SectionTag, FormTag]:
+def build_node(html: str) -> Node:
+    parser = Parser()
+    parser.feed(html)
+    if not parser.stack.is_empty():
+        raise MalformedHTMLException()
+    return parser.node
+
+
+def get_root_tag(node: Node) -> Tag:
+    tag_cls = get_tag_cls(node.tag)
+
+    if tag_cls.is_root():
+        return tag_cls.from_node(node)
+
+    raise ONEmSDKException(f'Invalid root node <{node.tag}>')
+
+
+def parse_html(filename: str) -> Tag:
     with open(filename, mode='r') as f:
         html = f.read()
-        parser = Parser()
-        parser.feed(html)
-        if not parser.stack.is_empty():
-            raise MalformedHTMLException()
-        if parser.node.tag == 'section':
-            root = SectionTag.from_node(parser.node)
-        elif parser.node.tag == 'form':
-            root = FormTag.from_node(parser.node)
-        else:
-            raise ONEmSDKException(f'Invalid root node <{parser.node.tag}>')
-
-    return root
+        node = build_node(html)
+        root_tag = get_root_tag(node)
+        return root_tag

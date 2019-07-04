@@ -1,0 +1,138 @@
+openapi: 3.0.0
+info:
+  version: v1
+  title: ''
+  description: ''
+paths: {}
+servers:
+- description: SwaggerHub API Auto Mocking
+  url: https://virtserver.swaggerhub.com/romeo1m/schemajson/v1
+components:
+  schemas:
+    ResponseDescription:
+      title: ResponseDescription
+      type: object
+      properties:
+        gt:
+          title: Gt
+          type: integer
+        lt:
+          title: Lt
+          anyOf:
+          - type: integer
+          - type: number
+          - type: string
+            format: date-time
+          - type: string
+            format: date
+        type:
+          title: Type
+          default: any
+          enum:
+          - option-data
+          - text
+          - datetime
+          - date
+          - any
+          type: string
+    Block:
+      title: Block
+      type: object
+      properties:
+        text:
+          title: Text
+          description: A line of text
+          type: string
+        href:
+          title: Href
+          description: The path to redirect to (it also transforms the block in an
+            option item)
+          type: string
+        data:
+          title: Data
+          description: The data to be returned as the wizard step data (it makes sense
+            only if the page is a wizard step)
+          type: string
+        method:
+          title: Method
+          description: The method used for sending data or href
+          default: POST
+          type: string
+      required:
+      - text
+    Page:
+      title: Page
+      type: object
+      properties:
+        is_form:
+          title: Is_Form
+          default: false
+          type: boolean
+        name:
+          title: Name
+          description: Used as key for the wizard step data
+          type: string
+        header:
+          title: Header
+          description: This will be decorated by ONEm platform
+          type: string
+        footer:
+          title: Footer
+          description: This will be decorated by ONEm platform
+          type: string
+        expected_response:
+          title: Expected_Response
+          description: The type and constraints that the expected response should
+            respect
+          default:
+            gt: null
+            lt: null
+            type: any
+          allOf:
+          - $ref: '#/components/schemas/ResponseDescription'
+        body:
+          title: Body
+          description: The content of a page
+          type: array
+          items:
+            $ref: '#/components/schemas/Block'
+      required:
+      - name
+      - body
+    Form:
+      title: Form
+      type: object
+      properties:
+        is_form:
+          title: Is_Form
+          default: true
+          type: boolean
+        header:
+          title: Header
+          description: It will overridden by the page header if specified
+          type: string
+        footer:
+          title: Footer
+          description: It will overridden by the page header if specified
+          type: string
+        action:
+          title: Action
+          description: The url to send the form data to
+          type: string
+        method:
+          title: Method
+          default: POST
+          type: string
+        confirmation_needed:
+          title: Confirmation_Needed
+          default: false
+          type: boolean
+        body:
+          title: Body
+          description: The content of a form (a sequence of pages)
+          type: array
+          items:
+            $ref: '#/components/schemas/Page'
+      required:
+      - action
+      - body

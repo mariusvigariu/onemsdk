@@ -1,0 +1,161 @@
+openapi: 3.0.0
+info:
+  version: v1
+  title: ''
+  description: ''
+paths: {}
+servers:
+- description: SwaggerHub API Auto Mocking
+  url: https://virtserver.swaggerhub.com/romeo1m/schemajson/v1
+components:
+  schemas:
+    MenuItem:
+      title: MenuItem
+      type: object
+      properties:
+        type:
+          title: Type
+          enum:
+          - option
+          - content
+          type: string
+        description:
+          title: Description
+          type: string
+        method:
+          title: Method
+          type: string
+        path:
+          title: Path
+          type: string
+      required:
+      - type
+      - description
+    Menu:
+      title: Menu
+      type: object
+      properties:
+        header:
+          title: Header
+          type: string
+        footer:
+          title: Footer
+          type: string
+        body:
+          title: Body
+          type: array
+          items:
+            $ref: '#/components/schemas/MenuItem'
+        type:
+          title: Type
+          default: menu
+          type: string
+      required:
+      - body
+    FormStepContent:
+      title: FormStepContent
+      type: object
+      properties:
+        type:
+          title: Type
+          enum:
+          - string
+          - date
+          type: string
+        name:
+          title: Name
+          type: string
+        description:
+          title: Description
+          type: string
+        path:
+          title: Path
+          type: string
+        method:
+          title: Method
+          type: string
+        header:
+          title: Header
+          type: string
+        footer:
+          title: Footer
+          type: string
+      required:
+      - type
+      - name
+      - description
+      - path
+      - method
+    FormStepMenuItem:
+      title: FormStepMenuItem
+      type: object
+      properties:
+        value:
+          title: Value
+          type: string
+        description:
+          title: Description
+          type: string
+        type:
+          title: Type
+          default: option
+          type: string
+      required:
+      - value
+      - description
+    FormStepMenu:
+      title: FormStepMenu
+      type: object
+      properties:
+        header:
+          title: Header
+          type: string
+        footer:
+          title: Footer
+          type: string
+        body:
+          title: Body
+          type: array
+          items:
+            $ref: '#/components/schemas/FormStepMenuItem'
+        type:
+          title: Type
+          default: form-menu
+          type: string
+      required:
+      - body
+    Form:
+      title: Form
+      type: object
+      properties:
+        header:
+          title: Header
+          type: string
+        footer:
+          title: Footer
+          type: string
+        meta:
+          title: Meta
+          type: object
+        path:
+          title: Path
+          type: string
+        body:
+          title: Body
+          type: array
+          items:
+            anyOf:
+            - $ref: '#/components/schemas/FormStepContent'
+            - $ref: '#/components/schemas/Menu'
+        type:
+          title: Type
+          default: form
+          type: string
+        method:
+          title: Method
+          default: POST
+          type: string
+      required:
+      - meta
+      - path
+      - body

@@ -52,8 +52,8 @@ components:
           type: string
       required:
       - body
-    FormStepContent:
-      title: FormStepContent
+    FormItemContent:
+      title: FormItemContent
       type: object
       properties:
         type:
@@ -86,8 +86,8 @@ components:
       - description
       - path
       - method
-    FormStepMenuItem:
-      title: FormStepMenuItem
+    FormItemMenuItem:
+      title: FormItemMenuItem
       type: object
       properties:
         value:
@@ -103,8 +103,8 @@ components:
       required:
       - value
       - description
-    FormStepMenu:
-      title: FormStepMenu
+    FormItemMenu:
+      title: FormItemMenu
       type: object
       properties:
         header:
@@ -117,13 +117,29 @@ components:
           title: Body
           type: array
           items:
-            $ref: '#/components/schemas/FormStepMenuItem'
+            $ref: '#/components/schemas/FormItemMenuItem'
         type:
           title: Type
           default: form-menu
           type: string
       required:
       - body
+    FormMeta:
+      title: FormMeta
+      type: object
+      properties:
+        completion_status_show:
+          title: Completion_Status_Show
+          default: true
+          type: boolean
+        completion_status_in_header:
+          title: Completion_Status_In_Header
+          default: true
+          type: boolean
+        confirmation_needed:
+          title: Confirmation_Needed
+          default: true
+          type: boolean
     Form:
       title: Form
       type: object
@@ -135,8 +151,7 @@ components:
           title: Footer
           type: string
         meta:
-          title: Meta
-          type: object
+          $ref: '#/components/schemas/FormMeta'
         path:
           title: Path
           type: string
@@ -145,7 +160,7 @@ components:
           type: array
           items:
             anyOf:
-            - $ref: '#/components/schemas/FormStepContent'
+            - $ref: '#/components/schemas/FormItemContent'
             - $ref: '#/components/schemas/Menu'
         type:
           title: Type
@@ -156,6 +171,5 @@ components:
           default: POST
           type: string
       required:
-      - meta
       - path
       - body

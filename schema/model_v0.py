@@ -1,6 +1,6 @@
 import json
 from enum import Enum
-from typing import Optional, Dict, Any, List, Union
+from typing import Optional, List, Union
 
 import oyaml as yaml
 from devtools import pprint
@@ -32,7 +32,7 @@ class FormStepContentType(str, Enum):
     date = 'date'
 
 
-class FormStepContent(BaseModel):
+class FormItemContent(BaseModel):
     type: FormStepContentType
     name: str
     description: str
@@ -42,25 +42,31 @@ class FormStepContent(BaseModel):
     footer: Optional[str]
 
 
-class FormStepMenuItem(BaseModel):
+class FormItemMenuItem(BaseModel):
     type = 'option'
     value: str
     description: str
 
 
-class FormStepMenu(Menu):
+class FormItemMenu(Menu):
     type = 'form-menu'
-    body: List[FormStepMenuItem]
+    body: List[FormItemMenuItem]
+
+
+class FormMeta(BaseModel):
+    completion_status_show: bool = True
+    completion_status_in_header: bool = True
+    confirmation_needed: bool = True
 
 
 class Form(BaseModel):
     type = 'form'
     header: Optional[str]
     footer: Optional[str]
-    meta: Dict[str, Any]
+    meta: Optional[FormMeta]
     method: str = 'POST'
     path: str
-    body: List[Union[FormStepContent, Menu]]
+    body: List[Union[FormItemContent, Menu]]
 
 
 begin = """
@@ -84,9 +90,9 @@ if __name__ == '__main__':
     top_level_schema = schema([
         MenuItem,
         Menu,
-        FormStepContent,
-        FormStepMenu,
-        FormStepMenuItem,
+        FormItemContent,
+        FormItemMenu,
+        FormItemMenuItem,
         Form
     ], ref_prefix='#/components/schemas/')
 

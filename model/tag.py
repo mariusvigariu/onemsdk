@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import datetime
 import inspect
+import json
 import sys
 from abc import ABC, abstractmethod
-from typing import List, Union, Type, Optional, Tuple
+from enum import Enum
+from typing import List, Union, Type, Optional, Tuple, Dict, Any, Callable, cast
 
 from pydantic import BaseModel
 
@@ -12,7 +15,7 @@ from .node import Node
 
 __all__ = ['Tag', 'HeaderTag', 'FooterTag', 'BrTag', 'UlTag', 'LiTag', 'FormTag',
            'SectionTag', 'InputTagAttrs', 'InputTag', 'FormTagAttrs', 'PTag', 'ATag',
-           'ATagAttrs', 'get_tag_cls']
+           'ATagAttrs', 'get_tag_cls', 'SectionTagAttrs', 'LiTagAttrs']
 
 
 class Tag(BaseModel, ABC):
@@ -59,6 +62,14 @@ class Tag(BaseModel, ABC):
     def from_node(cls: Type[Tag], node: Node) -> Tag:
         pass
 
+    @abstractmethod
+    def data(self) -> Dict[str, str]:
+        pass
+
+    def json_data(self, encoder: Optional[Callable[[Any], Any]] = None, **dumps_kwargs):
+        encoder = cast(Callable[[Any], Any], encoder or self._json_encoder)
+        return json.dumps(self.data(), default=encoder, **dumps_kwargs)
+
     class Config:
         can_be_root: bool = False
         tag_name: str = None
@@ -77,6 +88,9 @@ class HeaderTag(Tag):
                 f'Expected tag <{cls.Config.tag_name}>, received <{node.tag}>')
         children = node.children.copy()
         return cls(children=children)
+
+    def data(self):
+        return None
 
     class Config:
         can_be_root: bool = False
@@ -100,6 +114,9 @@ class FooterTag(Tag):
                 f'Expected tag <{cls.Config.tag_name}>, received <{node.tag}>')
         children = node.children.copy()
         return cls(children=children)
+
+    def data(self):
+        return None
 
     class Config:
         can_be_root: bool = False
@@ -130,6 +147,9 @@ class InputTag(Tag):
         attrs = InputTagAttrs(**node.attrs)
         return cls(attrs=attrs, children=node.children)
 
+    def data(self) -> Optional[Dict[str, str]]:
+        return None
+
     class Config:
         can_be_root: bool = False
         tag_name = 'input'
@@ -142,10 +162,11 @@ InputTag.update_forward_refs()
 
 class ATagAttrs(BaseModel):
     href: str
+    method: str = 'POST'
 
 
 class ATag(Tag):
-    attrs = ATagAttrs
+    attrs: ATagAttrs
 
     def render(self):
         return self.children[0]
@@ -159,6 +180,12 @@ class ATag(Tag):
         children = node.children.copy()
         return cls(attrs=attrs, children=children)
 
+    def data(self) -> Dict[str, str]:
+        return {
+            **self.attrs.dict(),
+            'text': self.children[0]
+        }
+
     class Config:
         can_be_root: bool = False
         tag_name = 'a'
@@ -169,7 +196,13 @@ class ATag(Tag):
 ATag.update_forward_refs()
 
 
+class LiTagAttrs(BaseModel):
+    value: Optional[str]
+
+
 class LiTag(Tag):
+    attrs: LiTagAttrs
+
     def render(self):
         if isinstance(self.children[0], ATag):
             return self.children[0].render() + '\n'
@@ -192,7 +225,23 @@ class LiTag(Tag):
                 children.append(tag_obj)
             else:
                 raise Exception(f'Unknown node type: {type(node)}')
-        return cls(children=children)
+
+        attrs = LiTagAttrs(**node.attrs)
+
+        return cls(children=children, attrs=attrs)
+
+    def data(self) -> Dict[str, str]:
+        if isinstance(self.children[0], str):
+            return {
+                **self.attrs.dict(),
+                'href': None,
+                'method': None,
+                'text': self.children[0]
+            }
+        return {
+            **self.attrs.dict(),
+            **self.children[0].data()
+        }
 
     class Config:
         can_be_root: bool = False
@@ -217,6 +266,11 @@ class UlTag(Tag):
         children = [get_tag_cls(child.tag).from_node(child) for child in node.children]
         return cls(children=children)
 
+    def data(self):
+        return [
+            child.data() for child in self.children
+        ]
+
     class Config:
         can_be_root: bool = False
         tag_name = 'ul'
@@ -238,6 +292,13 @@ class PTag(Tag):
                 f'Expected tag <{cls.Config.tag_name}>, received <{node.tag}>')
         children = node.children.copy()
         return cls(children=children)
+
+    def data(self):
+        return {
+            'text': self.children[0],
+            'href': None,
+            'data': None
+        }
 
     class Config:
         can_be_root: bool = False
@@ -261,6 +322,13 @@ class BrTag(Tag):
                 f'Expected tag <{cls.Config.tag_name}>, received <{node.tag}>')
         return cls(children=node.children)
 
+    def data(self):
+        return {
+            'text': '\n',
+            'data': None,
+            'href': None
+        }
+
     class Config:
         can_be_root: bool = False
         tag_name = 'br'
@@ -271,25 +339,60 @@ class BrTag(Tag):
 BrTag.update_forward_refs()
 
 
+class ResponseType(str, Enum):
+    option_data = 'option-data'
+    text = 'text'
+    datetime = 'datetime'
+    date = 'date'
+
+
+class ResponseDescription(BaseModel):
+    type: ResponseType = ResponseType.text
+
+    gt: Optional[int]
+    lt: Optional[Union[int, float, datetime.datetime, datetime.date]]
+
+
+class SectionTagAttrs(BaseModel):
+    name: Optional[str]  # Identifier for platform response
+    header: Optional[str]
+    footer: Optional[str]
+    # if ``expected_response`` is `None`, the next SMS must be preceded by #SERVICE
+    expected_response: Optional[ResponseDescription] = ResponseDescription()
+
+
 class SectionTag(Tag):
+    attrs: SectionTagAttrs
+
     def __init__(self, **data):
         super(SectionTag, self).__init__(**data)
-        children = data['children']
 
-        header_pos = [t[0] for t in enumerate(children) if isinstance(t[1], HeaderTag)]
+        header_pos = [t[0] for t in enumerate(self.children) if
+                      isinstance(t[1], HeaderTag)]
         if len(header_pos) > 1:
             raise ONEmSDKException('1 <header> per <section> permitted')
         if header_pos and header_pos[0] != 0:
             raise ONEmSDKException('<header> must be first in a <section>')
 
-        footer_pos = [t[0] for t in enumerate(children) if isinstance(t[1], FooterTag)]
+        footer_pos = [t[0] for t in enumerate(self.children) if
+                      isinstance(t[1], FooterTag)]
         if len(footer_pos) > 1:
             raise ONEmSDKException('1 <footer> per <section> permitted')
-        if footer_pos and footer_pos[0] != len(children) - 1:
+        if footer_pos and footer_pos[0] != len(self.children) - 1:
             raise ONEmSDKException('<footer> must be last in a <section>')
 
-        if len(children) - len(header_pos) - len(footer_pos) < 1:
+        if len(self.children) - len(header_pos) - len(footer_pos) < 1:
             raise ONEmSDKException('<section> must contain a body')
+
+        # if <header> and <footer> are present, override the attributes with them
+        if footer_pos:
+            footer = self.children[footer_pos[0]].children[0]
+            del self.children[footer_pos[0]]
+            self.attrs.footer = footer
+        if header_pos:
+            header = self.children[header_pos[0]].children[0]
+            del self.children[header_pos[0]]
+            self.attrs.header = header
 
     def render(self):
         rendered_children = []
@@ -315,7 +418,26 @@ class SectionTag(Tag):
                 tag_cls = get_tag_cls(node_child.tag)
                 tag_child = tag_cls.from_node(node_child)
                 tag_children.append(tag_child)
-        return cls(children=tag_children)
+
+        attrs = SectionTagAttrs(**node.attrs)
+
+        return cls(children=tag_children, attrs=attrs)
+
+    def data(self):
+        data = []
+        children_data = [child.data() for child in self.children]
+        for child_data in children_data:
+            if child_data is None:
+                continue
+            if isinstance(child_data, list):
+                data.extend(child_data)
+            else:
+                data.append(child_data)
+        return {
+            **self.attrs.dict(),
+            'is_form': False,
+            'body': data,
+        }
 
     class Config:
         can_be_root = True
@@ -328,13 +450,19 @@ SectionTag.update_forward_refs()
 
 
 class FormTagAttrs(BaseModel):
-    data_route: Optional[str]
-    data_method: Optional[str]
-    data_type: Optional[str]
+    header: Optional[str]
+    footer: Optional[str]
+    path: str
+    method: str = 'POST'
+
+    completion_status_show: bool = True
+    completion_status_in_header: bool = True
+    confirmation_needed: bool = False
 
 
 class FormTag(Tag):
     attrs: FormTagAttrs
+    children: List[SectionTag]
 
     def render(self):
         return '\n'.join([child.render() for child in self.children])
@@ -347,6 +475,13 @@ class FormTag(Tag):
         children = [get_tag_cls(child.tag).from_node(child) for child in node.children]
         attrs = FormTagAttrs(**node.attrs)
         return cls(children=children, attrs=attrs)
+
+    def data(self):
+        return {
+            'is_form': True,
+            **self.attrs.dict(),
+            'body': [child.data() for child in self.children]
+        }
 
     class Config:
         can_be_root = True

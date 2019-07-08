@@ -2,7 +2,8 @@ from unittest import TestCase
 
 from exceptions import ONEmSDKException
 from model.tag import PTag, HeaderTag, ATag, LiTag, UlTag, BrTag, get_tag_cls, FormTag, \
-    InputTag, InputTagAttrs, SectionTag, FooterTag
+    InputTag, InputTagAttrs, SectionTag, FooterTag, SectionTagAttrs, ATagAttrs, \
+    LiTagAttrs
 
 
 class TestModels(TestCase):
@@ -21,7 +22,7 @@ class TestModels(TestCase):
         self.assertEqual('One child', header.children[0])
 
     def test_li_tag(self):
-        a_tag = ATag(children=['one child'])
+        a_tag = ATag(attrs=ATagAttrs(href=""), children=['one child'])
 
         with self.assertRaises(ONEmSDKException) as context:
             _ = LiTag(children=[a_tag, 'oops'])
@@ -34,7 +35,7 @@ class TestModels(TestCase):
 
         self.assertIn('<header> cannot be child for <li>', str(context.exception))
 
-        li_tag = LiTag(children=[a_tag])
+        li_tag = LiTag(children=[a_tag], attrs=LiTagAttrs())
         self.assertEqual(a_tag, li_tag.children[0])
         self.assertEqual('one child', li_tag.children[0].children[0])
 
@@ -53,8 +54,8 @@ class TestModels(TestCase):
                       str(context.exception))
 
         ul_tag = UlTag(children=[
-            LiTag(children=['First list item']),
-            LiTag(children=['Second list item'])
+            LiTag(children=['First list item'], attrs=LiTagAttrs()),
+            LiTag(children=['Second list item'], attrs=LiTagAttrs())
         ])
 
         self.assertEqual('First list item', ul_tag.children[0].children[0])
@@ -100,20 +101,20 @@ class TestModels(TestCase):
 
     def test_section_tag(self):
         with self.assertRaises(ONEmSDKException) as context:
-            _ = SectionTag(children=[])
+            _ = SectionTag(attrs=SectionTagAttrs(), children=[])
 
         self.assertIn('<section> must have between 1 and 1000 children',
                       str(context.exception))
 
         with self.assertRaises(ONEmSDKException) as context:
-            _ = SectionTag(children=[
+            _ = SectionTag(attrs=SectionTagAttrs(), children=[
                 HeaderTag(children=['Header'])
             ])
 
         self.assertIn('<section> must contain a body', str(context.exception))
 
         with self.assertRaises(ONEmSDKException) as context:
-            _ = SectionTag(children=[
+            _ = SectionTag(attrs=SectionTagAttrs(), children=[
                 HeaderTag(children=['Header']),
                 FooterTag(children=['Footer'])
             ])
@@ -121,7 +122,7 @@ class TestModels(TestCase):
         self.assertIn('<section> must contain a body', str(context.exception))
 
         with self.assertRaises(ONEmSDKException) as context:
-            _ = SectionTag(children=[
+            _ = SectionTag(attrs=SectionTagAttrs(), children=[
                 PTag(children=['Body']),
                 HeaderTag(children=['Header'])
             ])
@@ -129,7 +130,7 @@ class TestModels(TestCase):
         self.assertIn('<header> must be first in a <section>', str(context.exception))
 
         with self.assertRaises(ONEmSDKException) as context:
-            _ = SectionTag(children=[
+            _ = SectionTag(attrs=SectionTagAttrs(), children=[
                 FooterTag(children=['Footer']),
                 PTag(children=['Body']),
             ])
@@ -137,7 +138,7 @@ class TestModels(TestCase):
         self.assertIn('<footer> must be last in a <section>', str(context.exception))
 
         with self.assertRaises(ONEmSDKException) as context:
-            _ = SectionTag(children=[
+            _ = SectionTag(attrs=SectionTagAttrs(), children=[
                 PTag(children=['Body']),
                 FooterTag(children=['Footer']),
                 FooterTag(children=['Footer']),
@@ -146,7 +147,7 @@ class TestModels(TestCase):
         self.assertIn('1 <footer> per <section> permitted', str(context.exception))
 
         with self.assertRaises(ONEmSDKException) as context:
-            _ = SectionTag(children=[
+            _ = SectionTag(attrs=SectionTagAttrs(), children=[
                 HeaderTag(children=['Header']),
                 HeaderTag(children=['Header']),
                 PTag(children=['Body']),
@@ -155,8 +156,9 @@ class TestModels(TestCase):
         self.assertIn('1 <header> per <section> permitted', str(context.exception))
 
         with self.assertRaises(ONEmSDKException) as context:
-            _ = SectionTag(children=[
-                SectionTag(children=[PTag(children=['Text'])])
+            _ = SectionTag(attrs=SectionTagAttrs(), children=[
+                SectionTag(attrs=SectionTagAttrs(),
+                           children=[PTag(children=['Text'])])
             ])
 
         self.assertIn('<section> cannot be child for <section>', str(context.exception))

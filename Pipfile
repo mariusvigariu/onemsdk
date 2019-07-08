@@ -6,7 +6,8 @@ verify_ssl = true
 [dev-packages]
 
 [packages]
-pydantic = "==0.29"
+pydantic = "==0.30"
+oyaml = "==0.9"
 
 [requires]
 python_version = "3.7"

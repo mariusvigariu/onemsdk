@@ -214,7 +214,7 @@ class Form(BaseModel):
 begin = """
 openapi: 3.0.0
 info:
-  version: 'v1'
+  version: 'm1'
   title: 'ONEm JSON response schema'
   description: ''
 paths: {}

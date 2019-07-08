@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   version: v1
-  title: ''
+  title: ONEm JSON response schema
   description: ''
 paths: {}
 servers:
@@ -61,18 +61,13 @@ components:
           enum:
           - string
           - date
+          - datetime
           type: string
         name:
           title: Name
           type: string
         description:
           title: Description
-          type: string
-        path:
-          title: Path
-          type: string
-        method:
-          title: Method
           type: string
         header:
           title: Header
@@ -84,24 +79,24 @@ components:
       - type
       - name
       - description
-      - path
-      - method
     FormItemMenuItem:
       title: FormItemMenuItem
       type: object
       properties:
+        type:
+          title: Type
+          enum:
+          - option
+          - content
+          type: string
         value:
           title: Value
           type: string
         description:
           title: Description
           type: string
-        type:
-          title: Type
-          default: option
-          type: string
       required:
-      - value
+      - type
       - description
     FormItemMenu:
       title: FormItemMenu

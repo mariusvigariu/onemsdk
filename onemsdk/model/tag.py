@@ -203,6 +203,11 @@ class LiTagAttrs(BaseModel):
 class LiTag(Tag):
     attrs: LiTagAttrs
 
+    def __init__(self, **data):
+        if 'attrs' not in data:
+            data['attrs'] = LiTagAttrs()
+        super().__init__(**data)
+
     def render(self):
         if isinstance(self.children[0], ATag):
             return self.children[0].render() + '\n'
@@ -226,9 +231,10 @@ class LiTag(Tag):
             else:
                 raise Exception(f'Unknown node type: {type(node)}')
 
-        attrs = LiTagAttrs(**node.attrs)
-
-        return cls(children=children, attrs=attrs)
+        if node.attrs:
+            attrs = LiTagAttrs(**node.attrs)
+            return cls(children=children, attrs=attrs)
+        return cls(children=children)
 
     def data(self) -> Dict[str, str]:
         if isinstance(self.children[0], str):

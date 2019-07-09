@@ -39,6 +39,10 @@ class TestModels(TestCase):
         self.assertEqual(a_tag, li_tag.children[0])
         self.assertEqual('one child', li_tag.children[0].children[0])
 
+        li_tag = LiTag(children=[a_tag])
+        self.assertEqual(a_tag, li_tag.children[0])
+        self.assertEqual('one child', li_tag.children[0].children[0])
+
     def test_ul_tag(self):
         with self.assertRaises(ONEmSDKException) as context:
             _ = UlTag(children=[

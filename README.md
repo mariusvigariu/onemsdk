@@ -34,7 +34,7 @@ developer portal and registered an app. We will assume your app is called
 **my-first-app**.
 
 ### 1. Using a static HTML file
-    1. Create `menu.html` file and fill it with:
+#### 1.1. Create `menu.html` file:
 ```html
 <section>
   <header>my menu</header>
@@ -52,7 +52,8 @@ developer portal and registered an app. We will assume your app is called
   <footer>Reply A-C</footer>
 </section>
 ```
-    2. In your request handler
+
+#### 1.2. In your request handler:
 ```python
 import json
 
@@ -72,7 +73,8 @@ def handle_request(request):
 ```
 
 ### 2. Using a template (Jinja2)
-    1. Create `menu.j2` file and fill it with:
+
+#### 2.1. Create `menu.j2` file:
 ```jinja2
 <section>
   <header>{{ header }}</header>
@@ -89,7 +91,8 @@ def handle_request(request):
   <footer>{{ footer }}</footer>
 </section>
 ```
-    2. In your request handler:
+
+#### 2.2. In your request handler:
 ```python
 import json
 
@@ -136,7 +139,8 @@ def handle_request_with_template(request):
 ```
 
 ### 3. Using pure Python code
-    1. In your request handler:
+
+#### 3.1. In your request handler:
 ```python
 import json
 

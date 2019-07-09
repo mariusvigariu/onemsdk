@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from parser import build_node
+from onemsdk.parser import build_node
 
 
 class TestParser(TestCase):

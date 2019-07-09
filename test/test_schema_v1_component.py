@@ -1,8 +1,8 @@
 from unittest import TestCase
 
-from model.tag import FormTag
-from parser import build_node
-from schema.v1.component import Form
+from onemsdk.model import FormTag
+from onemsdk.parser import build_node
+from onemsdk.schema.v1.component import Form
 
 
 class TestModel(TestCase):

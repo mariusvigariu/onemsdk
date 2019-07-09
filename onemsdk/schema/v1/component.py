@@ -9,7 +9,7 @@ import oyaml as yaml
 from pydantic import BaseModel
 from pydantic.schema import schema
 
-from model.tag import FormTag, SectionTag, LiTag, PTag, BrTag, UlTag, ResponseType
+from onemsdk.model import FormTag, SectionTag, LiTag, PTag, BrTag, UlTag, ResponseType
 
 
 class MenuItemType(str, Enum):

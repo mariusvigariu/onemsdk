@@ -1,9 +1,9 @@
 from unittest import TestCase
 
-from exceptions import ONEmSDKException
-from model.tag import PTag, HeaderTag, ATag, LiTag, UlTag, BrTag, get_tag_cls, FormTag, \
-    InputTag, InputTagAttrs, SectionTag, FooterTag, SectionTagAttrs, ATagAttrs, \
-    LiTagAttrs
+from onemsdk.exceptions import ONEmSDKException
+from onemsdk.model.tag import (PTag, HeaderTag, ATag, LiTag, UlTag, BrTag, get_tag_cls,
+                               FormTag, InputTag, InputTagAttrs, SectionTag, FooterTag,
+                               SectionTagAttrs, ATagAttrs, LiTagAttrs)
 
 
 class TestModels(TestCase):

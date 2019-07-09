@@ -1,9 +1,9 @@
 from html.parser import HTMLParser
 from typing import Union, TypeVar
 
-from exceptions import MalformedHTMLException, ONEmSDKException
-from model.node import Node
-from model.tag import get_tag_cls, Tag
+from onemsdk.exceptions import MalformedHTMLException, ONEmSDKException
+from onemsdk.model.node import Node
+from onemsdk.model.tag import get_tag_cls, Tag
 
 
 class Stack:

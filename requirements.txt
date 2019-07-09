@@ -1,0 +1,2 @@
+oyaml==0.9
+pydantic==0.30

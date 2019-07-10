@@ -1,14 +1,11 @@
 from __future__ import annotations
 
-import json
-import os
 from enum import Enum
 from typing import Optional, List, Union
 
-import oyaml as yaml
 from pydantic import BaseModel
-from pydantic.schema import schema
 
+from onemsdk.exceptions import ONEmSDKException
 from onemsdk.model import FormTag, SectionTag, LiTag, PTag, BrTag, UlTag, ResponseType
 
 
@@ -181,7 +178,7 @@ class Form(BaseModel):
     meta: Optional[FormMeta]
     method: str = 'POST'
     path: str
-    body: List[Union[FormItemContent, Menu]]
+    body: List[Union[FormItemContent, FormItemMenu]]
 
     @classmethod
     def from_tag(cls, form_tag: FormTag) -> Form:
@@ -211,34 +208,28 @@ class Form(BaseModel):
         return form
 
 
-begin = """
-openapi: 3.0.0
-info:
-  version: 'm1'
-  title: 'ONEm JSON response schema'
-  description: ''
-paths: {}
-servers:
-  - description: SwaggerHub API Auto Mocking
-    url: https://virtserver.swaggerhub.com/romeo1m/schemajson/v1
-components:
-  schemas:
-"""
+class MessageContentType(str, Enum):
+    form = 'form'
+    menu = 'menu'
 
-if __name__ == '__main__':
-    file_dict = yaml.safe_load(begin)
 
-    top_level_schema = schema([
-        MenuItem,
-        Menu,
-        FormItemContent,
-        FormItemMenu,
-        FormItemMenuItem,
-        Form
-    ], ref_prefix='#/components/schemas/')
+class Response(BaseModel):
+    message_id: Optional[str]
+    content_type: MessageContentType
+    content: Union[Form, Menu]
 
-    top_level_schema = json.loads(json.dumps(top_level_schema))
-    file_dict['components']['schemas'] = top_level_schema['definitions']
-    file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'schema.yaml')
-    with open(file, mode="w+") as f:
-        f.write(yaml.dump(file_dict))
+    @classmethod
+    def from_tag(cls, tag: Union[FormTag, SectionTag], message_id: Optional[str] = None):
+        if isinstance(tag, FormTag):
+            return Response(
+                message_id=message_id,
+                content_type=MessageContentType.form,
+                content=Form.from_tag(tag)
+            )
+        if isinstance(tag, SectionTag):
+            return Response(
+                message_id=message_id,
+                content_type=MessageContentType.menu,
+                content=Menu.from_tag(tag)
+            )
+        raise ONEmSDKException(f'Cannot create response from {tag.Config.tag_name} tag')

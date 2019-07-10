@@ -57,7 +57,8 @@ developer portal and registered an app. We will assume your app is called
 ```python
 import json
 
-from onemsdk.schema.v1 import create_response, load_html
+from onemsdk.parser import load_html
+from onemsdk.schema.v1 import Response
 
 
 def handle_request(request):
@@ -66,8 +67,8 @@ def handle_request(request):
     root_tag = load_html(html_file="menu.html")
     
     # Turn the python object to a dict compatible to JSON schema
-    response = create_response(root_tag)
-    
+    response = Response.from_tag(root_tag).dict()
+
     # Turn the dict into bytes and send it over the wire
     return json.dumps(response)
 ```
@@ -96,8 +97,8 @@ def handle_request(request):
 ```python
 import json
 
-from onemsdk.schema.v1 import load_html, create_response
-from onemsdk.schema import load_template
+from onemsdk.schema.v1 import Response
+from onemsdk.parser import load_template
 
 
 def handle_request_with_template(request):
@@ -124,14 +125,11 @@ def handle_request_with_template(request):
         ]
     }
     
-    # Generate the html based on the template file and data
-    html = load_template(template_file="menu.j2", **data)
-
-    # Turn the HTML into Python object
-    root_tag = load_html(html_str=html)
+    # Turn the HTML template into Python object
+    root_tag = load_template(template_file="menu.j2", **data)
 
     # Turn the python object to a dict compatible to JSON schema
-    response = create_response(root_tag)
+    response = Response.from_tag(root_tag).dict()
 
     # Turn the dict into bytes and send it over the wire
     return json.dumps(response)
@@ -145,7 +143,7 @@ def handle_request_with_template(request):
 import json
 
 from onemsdk.model import UlTag, LiTag, ATag, ATagAttrs, SectionTag, SectionTagAttrs
-from onemsdk.schema.v1 import create_response
+from onemsdk.schema.v1 import Response
 
 
 def handle_request_with_pure_python(request):
@@ -185,7 +183,7 @@ def handle_request_with_pure_python(request):
     )
 
     # Turn the python object to a dict compatible to JSON schema
-    response = create_response(root_tag)
+    response = Response.from_tag(root_tag).dict()
 
     # Turn the dict into bytes and send it over the wire
     return json.dumps(response)

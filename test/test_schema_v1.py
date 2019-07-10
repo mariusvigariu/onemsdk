@@ -1,16 +1,22 @@
 import json
 from unittest import TestCase
 
-from onemsdk.schema.v1 import load_html
-from onemsdk.schema.v1.util import create_response
+from onemsdk.model import FormTag
+from onemsdk.parser import build_node, load_html
+from onemsdk.schema.v1 import Form, Response
 
 
-class TestUtil(TestCase):
-    def test_load_html(self):
-        tag = load_html(html_file='index.html')
-        assert tag.Config.tag_name == 'form'
+class TestModel(TestCase):
+    def test_model(self):
+        filename = 'index.html'
+        with open(filename, mode="r") as f:
+            html = f.read()
+            node = build_node(html)
+            tag = FormTag.from_node(node)
+            schema = Form.from_tag(tag)
+            print(schema.json(indent=2))
 
-    def test_create_response(self):
+    def test_response(self):
         html = """
         <section>
           <header>my menu</header>
@@ -29,5 +35,5 @@ class TestUtil(TestCase):
         </section>
         """
         tag = load_html(html_str=html)
-        js = create_response(tag)
+        js = Response.from_tag(tag, message_id='asdf').dict()
         print(json.dumps(js, indent=2))

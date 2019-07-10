@@ -1,9 +1,14 @@
+import os
 from html.parser import HTMLParser
 from typing import Union, TypeVar
 
+import jinja2
+
 from onemsdk.exceptions import MalformedHTMLException, ONEmSDKException
 from onemsdk.model.node import Node
-from onemsdk.model.tag import get_tag_cls, Tag
+from onemsdk.model.tag import get_tag_cls, Tag, SectionTag, FormTag
+
+__all__ = ['load_html', 'load_template']
 
 
 class Stack:
@@ -91,9 +96,22 @@ def get_root_tag(node: Node) -> Tag:
     raise ONEmSDKException(f'Invalid root node <{node.tag}>')
 
 
-def parse_html(filename: str) -> Tag:
-    with open(filename, mode='r') as f:
-        html = f.read()
-        node = build_node(html)
-        root_tag = get_root_tag(node)
-        return root_tag
+def load_html(*, html_file: str = None, html_str: str = None
+              ) -> Union[SectionTag, FormTag]:
+    if html_file:
+        with open(html_file, 'r') as f:
+            html_str = f.read()
+
+    node = build_node(html_str)
+    root_tag = get_root_tag(node)
+    return root_tag
+
+
+def _load_template(template_file: str, **data) -> str:
+    dir = os.path.dirname(os.path.abspath(template_file))
+    renv = jinja2.Environment(loader=jinja2.FileSystemLoader(dir))
+    return renv.get_template(template_file).render(data)
+
+
+def load_template(template_file: str, **data) -> Union[SectionTag, FormTag]:
+    return load_html(html_str=_load_template(template_file, **data))

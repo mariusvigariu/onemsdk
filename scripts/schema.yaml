@@ -156,7 +156,7 @@ components:
           items:
             anyOf:
             - $ref: '#/components/schemas/FormItemContent'
-            - $ref: '#/components/schemas/Menu'
+            - $ref: '#/components/schemas/FormItemMenu'
         type:
           title: Type
           default: form
@@ -168,3 +168,24 @@ components:
       required:
       - path
       - body
+    Response:
+      title: Response
+      type: object
+      properties:
+        message_id:
+          title: Message_Id
+          type: string
+        content_type:
+          title: Content_Type
+          enum:
+          - form
+          - menu
+          type: string
+        content:
+          title: Content
+          anyOf:
+          - $ref: '#/components/schemas/Form'
+          - $ref: '#/components/schemas/Menu'
+      required:
+      - content_type
+      - content

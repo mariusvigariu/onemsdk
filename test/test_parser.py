@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from onemsdk.parser import build_node
+from onemsdk.parser import build_node, _load_template
 
 
 class TestParser(TestCase):
@@ -79,3 +79,23 @@ class TestParser(TestCase):
         self.assertEqual('p', second_paragraph.tag)
         self.assertEqual(1, len(second_paragraph.children))
         self.assertEqual('Paragraph 2 section 3', second_paragraph.children[0])
+
+    def test_load_template(self):
+        data = {
+            'li': {
+                '2': {'data': 'opt-21'},
+            },
+            'section': {
+                '3': {'name': 'third-step'}
+            },
+            'items': [
+                {'data': 'opt-31', 'href': 'route-1', 'desc': 'Option 1 section 3'},
+                {'data': 'opt-32', 'href': 'route-2', 'desc': 'Option 2 section 3'},
+                {'data': 'opt-33', 'href': 'route-3', 'desc': 'Option 3 section 3'},
+            ]
+        }
+        rendered_html = _load_template('index.j2', **data)
+        with open('index.html', mode='r') as f:
+            html = f.read()
+
+        self.assertEqual(html, rendered_html)

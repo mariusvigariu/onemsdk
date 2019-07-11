@@ -2,7 +2,7 @@
 
 ## Installation
 ```bash
-$ pip install git+https://github.com/romeo1m/onemsdk.git
+$ pip install onemsdk
 ```
 
 ## Usage example

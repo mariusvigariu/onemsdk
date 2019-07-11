@@ -5,8 +5,8 @@ from typing import Union, TypeVar
 import jinja2
 
 from onemsdk.exceptions import MalformedHTMLException, ONEmSDKException
-from onemsdk.model.node import Node
-from onemsdk.model.tag import get_tag_cls, Tag, SectionTag, FormTag
+from onemsdk.parser.node import Node
+from onemsdk.parser.tag import get_tag_cls, Tag, SectionTag, FormTag
 
 __all__ = ['load_html', 'load_template']
 

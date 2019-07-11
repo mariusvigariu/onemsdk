@@ -4,8 +4,8 @@ import os
 import oyaml as yaml
 from pydantic.schema import schema
 
-from onemsdk.schema.v1.component import MenuItem, Menu, FormItemContent, FormItemMenu, \
-    FormItemMenuItem, Form, Response
+from onemsdk.schema.v1 import (MenuItem, Menu, FormItemContent, FormItemMenu,
+                               FormItemMenuItem, Form, Response)
 
 begin = """
 openapi: 3.0.0

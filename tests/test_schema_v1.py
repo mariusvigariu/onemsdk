@@ -1,8 +1,8 @@
 import json
 from unittest import TestCase
 
-from onemsdk.model import FormTag
-from onemsdk.parser import build_node, load_html
+from onemsdk.parser import FormTag
+from onemsdk.parser.util import build_node, load_html
 from onemsdk.schema.v1 import Form, Response
 
 

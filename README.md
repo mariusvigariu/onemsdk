@@ -142,7 +142,7 @@ def handle_request_with_template(request):
 ```python
 import json
 
-from onemsdk.model import UlTag, LiTag, ATag, ATagAttrs, SectionTag, SectionTagAttrs
+from onemsdk.parser import UlTag, LiTag, ATag, ATagAttrs, SectionTag, SectionTagAttrs
 from onemsdk.schema.v1 import Response
 
 

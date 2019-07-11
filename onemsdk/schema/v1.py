@@ -6,7 +6,7 @@ from typing import Optional, List, Union
 from pydantic import BaseModel
 
 from onemsdk.exceptions import ONEmSDKException
-from onemsdk.model import FormTag, SectionTag, LiTag, PTag, BrTag, UlTag, ResponseType
+from onemsdk.parser import FormTag, SectionTag, LiTag, PTag, BrTag, UlTag, ResponseType
 
 
 class MenuItemType(str, Enum):

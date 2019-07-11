@@ -218,6 +218,16 @@ class Response(BaseModel):
     content_type: MessageContentType
     content: Union[Form, Menu]
 
+    def __init__(self, **data):
+        if isinstance(data['content'], Menu):
+            content_type = MessageContentType.menu
+        else:
+            content_type = MessageContentType.form
+
+        data['content_type'] = content_type
+
+        super(Response, self).__init__(**data)
+
     @classmethod
     def from_tag(cls, tag: Union[FormTag, SectionTag], message_id: Optional[str] = None):
         if isinstance(tag, FormTag):

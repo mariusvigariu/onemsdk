@@ -214,7 +214,7 @@ class MessageContentType(str, Enum):
 
 
 class Response(BaseModel):
-    message_id: Optional[str]
+    correlation_id: Optional[str]
     content_type: MessageContentType
     content: Union[Form, Menu]
 

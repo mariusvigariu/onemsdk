@@ -67,8 +67,8 @@ def handle_request(request):
     # Turn the tag object into a Response object compatible with the JSON schema
     response = Response.from_tag(root_tag)
 
-    # Optionally add the correlation_id received in request to response
-    response.correlation_id = 'request correlation id'
+    # Optionally add the corr_id received in request to response
+    response.corr_id = 'request correlation id'
 
     # Jsonify the response and send it the over the wire
     return response.json()
@@ -130,8 +130,8 @@ def handle_request_with_template(request):
     # Turn the tag object into a Response object compatible with the JSON schema
     response = Response.from_tag(root_tag)
 
-    # Optionally add the correlation_id received in request to response
-    response.correlation_id = 'request correlation id'
+    # Optionally add the corr_id received in request to response
+    response.corr_id = 'request correlation id'
 
     # Jsonify the response and send it the over the wire
     return response.json()
@@ -192,8 +192,8 @@ def handle_request_with_object_tags(request):
     # Turn the tag object into a Response object compatible with the JSON schema
     response = Response.from_tag(root_tag)
 
-    # Optionally add the correlation_id received in request to response
-    response.correlation_id = 'request correlation id'
+    # Optionally add the corr_id received in request to response
+    response.corr_id = 'request correlation id'
 
     # Jsonify the response and send it the over the wire
     return response.json()
@@ -226,8 +226,8 @@ def handle_request_with_object_tags(request):
     # Wrap the Menu object into a Response object compatible with the JSON schema
     response = Response(content=menu)
 
-    # Optionally add the correlation_id received in request to response
-    response.correlation_id = 'request correlation id'
+    # Optionally add the corr_id received in request to response
+    response.corr_id = 'request correlation id'
 
     # Jsonify the response and send it the over the wire
     return response.json()
@@ -239,7 +239,7 @@ All the above 3 methods of creating the menu will generate the same JSON respons
 
 ```json
 {
-  "correlation_id": "request correlation id",
+  "corr_id": "request correlation id",
   "content_type": "menu",
   "content": {
     "header": "my menu",

@@ -172,8 +172,8 @@ components:
       title: Response
       type: object
       properties:
-        correlation_id:
-          title: Correlation_Id
+        corr_id:
+          title: Corr_Id
           type: string
         content_type:
           title: Content_Type

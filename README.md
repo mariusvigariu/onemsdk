@@ -67,9 +67,6 @@ def handle_request(request):
     # Turn the tag object into a Response object compatible with the JSON schema
     response = Response.from_tag(root_tag)
 
-    # Optionally add the corr_id received in request to response
-    response.corr_id = 'request correlation id'
-
     # Jsonify the response and send it the over the wire
     return response.json()
 ```
@@ -130,9 +127,6 @@ def handle_request_with_template(request):
     # Turn the tag object into a Response object compatible with the JSON schema
     response = Response.from_tag(root_tag)
 
-    # Optionally add the corr_id received in request to response
-    response.corr_id = 'request correlation id'
-
     # Jsonify the response and send it the over the wire
     return response.json()
 ```
@@ -191,9 +185,6 @@ def handle_request_with_object_tags(request):
 
     # Turn the tag object into a Response object compatible with the JSON schema
     response = Response.from_tag(root_tag)
-
-    # Optionally add the corr_id received in request to response
-    response.corr_id = 'request correlation id'
 
     # Jsonify the response and send it the over the wire
     return response.json()

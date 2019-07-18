@@ -172,9 +172,6 @@ components:
       title: Response
       type: object
       properties:
-        corr_id:
-          title: Corr_Id
-          type: string
         content_type:
           title: Content_Type
           enum:

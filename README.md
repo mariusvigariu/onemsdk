@@ -135,10 +135,10 @@ def handle_request_with_template(request):
 
 There are two possibilities of building ONEm apps using pure Python: 
 - If you are more comfortable with the HTML side you can use the lower level Python
-object tags located in [/onemsdk/parser/tag.py](/onemsdk/parser/tag.py), which are very 
+object tags located in [onemsdk/parser/tag.py](onemsdk/parser/tag.py), which are very
 similar with the HTML tags (eg. `FormTag`, `SectionTag`, `UlTag` etc).
 - Otherwise, if you feel you are closer to the JSON schema, you can use the
-higher level Python models located in [/onemsdk/schema/v1.py](/onemsdk/schema/v1.py) 
+higher level Python models located in [onemsdk/schema/v1.py](onemsdk/schema/v1.py)
 (eg. `Form`, `Menu` etc).
 
 #### Using Python object tags

@@ -144,9 +144,11 @@ class FormItemMenuItem(BaseModel):
         return menu_item
 
 
-class FormItemMenu(Menu):
+class FormItemMenu(BaseModel):
     type = 'form-menu'
     body: List[FormItemMenuItem]
+    header: Optional[str]
+    footer: Optional[str]
 
     @classmethod
     def from_tag(cls, section_tag: SectionTag) -> FormItemMenu:
@@ -166,9 +168,9 @@ class FormItemMenu(Menu):
 
 
 class FormMeta(BaseModel):
-    completion_status_show: bool = True
-    completion_status_in_header: bool = True
-    confirmation_needed: bool = True
+    completion_status_show: Optional[bool]
+    completion_status_in_header: Optional[bool]
+    confirmation_needed: Optional[bool]
 
 
 class Form(BaseModel):

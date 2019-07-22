@@ -11,53 +11,67 @@ components:
   schemas:
     MenuItem:
       title: MenuItem
+      description: An item in a menu. Depending on its type, a menu item can be either
+        an option (type=option) or an option separator (type=content)
       type: object
       properties:
         type:
           title: Type
+          description: The type of the menu item.
           enum:
           - option
           - content
           type: string
         description:
           title: Description
+          description: The displayed text of a menu item.
           type: string
         method:
           title: Method
+          description: The HTTP method called when the menu item is selected.
           type: string
         path:
           title: Path
+          description: The path called when the menu item is selected.
           type: string
       required:
       - type
       - description
     Menu:
       title: Menu
+      description: A top level component that permits displaying a navigable menu
+        or a plain text.
       type: object
       properties:
+        type:
+          title: Type
+          description: The type of the Menu object is always "menu"
+          const: menu
+          type: string
         header:
           title: Header
+          description: The header of the menu.
           type: string
         footer:
           title: Footer
+          description: The header of the menu.
           type: string
         body:
           title: Body
+          description: The body/content of the menu
           type: array
           items:
             $ref: '#/components/schemas/MenuItem'
-        type:
-          title: Type
-          default: menu
-          type: string
       required:
       - body
     FormItemContent:
       title: FormItemContent
+      description: Component used to ask a user for a certain type of free input
       type: object
       properties:
         type:
           title: Type
+          description: The type of data expected from the user
           enum:
           - string
           - date
@@ -65,15 +79,20 @@ components:
           type: string
         name:
           title: Name
+          description: An identifier to be linked with the data value obtained from
+            user. It has to be unique per form.
           type: string
         description:
           title: Description
+          description: The displayed text.
           type: string
         header:
           title: Header
+          description: The header of the form item
           type: string
         footer:
           title: Footer
+          description: The footer of the form item
           type: string
       required:
       - type
@@ -81,108 +100,141 @@ components:
       - description
     FormItemMenuItem:
       title: FormItemMenuItem
+      description: An item in a form's menu
       type: object
       properties:
         type:
           title: Type
+          description: The type of a menu item inside a form
           enum:
           - option
           - content
           type: string
-        value:
-          title: Value
-          type: string
         description:
           title: Description
+          description: The displayed text.
+          type: string
+        value:
+          title: Value
+          description: If type=option, value is used to identify the option chosen
+            by the user
           type: string
       required:
       - type
       - description
     FormItemMenu:
       title: FormItemMenu
+      description: Item in a form's body used to ask the user to select an option
+        from a list
       type: object
       properties:
-        header:
-          title: Header
-          type: string
-        footer:
-          title: Footer
+        type:
+          title: Type
+          description: The type of a FormItemMenu is always form-menu
+          const: form-menu
           type: string
         body:
           title: Body
+          description: A sequence of menu items containing options and/or option separators
           type: array
           items:
             $ref: '#/components/schemas/FormItemMenuItem'
-        type:
-          title: Type
-          default: form-menu
+        header:
+          title: Header
+          description: The form menu header
+          type: string
+        footer:
+          title: Footer
+          description: The form menu footer
           type: string
       required:
       - body
     FormMeta:
       title: FormMeta
+      description: Configuration fields for a Form
       type: object
       properties:
         completion_status_show:
-          title: Completion_Status_Show
-          default: true
+          title: Show completion status
+          description: Whether to display the completions status
           type: boolean
         completion_status_in_header:
-          title: Completion_Status_In_Header
-          default: true
+          title: Show completion status in header
+          description: Whether to display the completion status in header
           type: boolean
         confirmation_needed:
-          title: Confirmation_Needed
-          default: true
+          title: Confirmation needed
+          description: Whether to add an additional item at the end of the form for
+            confirmation
           type: boolean
     Form:
       title: Form
+      description: A top level component used to acquire information from user
       type: object
       properties:
+        type:
+          title: Type
+          description: The type of a form is always form
+          const: form
+          type: string
         header:
           title: Header
+          description: The header of the form. It can be overwritten by each body
+            component
           type: string
         footer:
           title: Footer
+          description: The footer of the form. It can be overwritten by each body
+            component
           type: string
         meta:
-          $ref: '#/components/schemas/FormMeta'
+          title: Meta
+          description: Contains configuration flags
+          allOf:
+          - $ref: '#/components/schemas/FormMeta'
+        method:
+          title: Method
+          description: The HTTP method used to send the form data
+          default: POST
+          type: string
         path:
           title: Path
+          description: The path used to send the form data
           type: string
         body:
           title: Body
+          description: Sequence of components used to acquire the pieces of data needed
+            from user
           type: array
           items:
             anyOf:
             - $ref: '#/components/schemas/FormItemContent'
             - $ref: '#/components/schemas/FormItemMenu'
-        type:
-          title: Type
-          default: form
-          type: string
-        method:
-          title: Method
-          default: POST
-          type: string
       required:
       - path
       - body
     Response:
       title: Response
+      description: A JSON-serialized instance of Response must be sent as response
+        to the ONEm platform. It can be built only from a top level object (Menu,
+        Form).
       type: object
       properties:
         content_type:
-          title: Content_Type
+          title: Content type
+          description: The type of the content of the response
           enum:
           - form
           - menu
           type: string
         content:
           title: Content
+          description: The content of the response
           anyOf:
-          - $ref: '#/components/schemas/Form'
-          - $ref: '#/components/schemas/Menu'
+          - allOf:
+            - $ref: '#/components/schemas/Form'
+          - allOf:
+            - $ref: '#/components/schemas/Menu'
       required:
       - content_type
       - content

@@ -3,7 +3,7 @@ from __future__ import annotations
 from enum import Enum
 from typing import Optional, List, Union
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Schema
 
 from onemsdk.exceptions import ONEmSDKException
 from onemsdk.parser import FormTag, SectionTag, LiTag, PTag, BrTag, UlTag, ResponseType
@@ -15,10 +15,25 @@ class MenuItemType(str, Enum):
 
 
 class MenuItem(BaseModel):
-    type: MenuItemType
-    description: str
-    method: Optional[str]
-    path: Optional[str]
+    """
+    An item in a menu. Depending on its type, a menu item can be either an option (type=option) or an option separator (type=content)
+    """
+    type: MenuItemType = Schema(
+        ...,
+        description='The type of the menu item.'
+    )
+    description: str = Schema(
+        ...,
+        description='The displayed text of a menu item.'
+    )
+    method: str = Schema(
+        None,
+        description='The HTTP method called when the menu item is selected.'
+    )
+    path: str = Schema(
+        None,
+        description='The path called when the menu item is selected.'
+    )
 
     @classmethod
     def from_tag(cls, tag: Union[LiTag, PTag, BrTag, str]) -> MenuItem:
@@ -51,10 +66,26 @@ class MenuItem(BaseModel):
 
 
 class Menu(BaseModel):
-    type = 'menu'
-    header: Optional[str]
-    footer: Optional[str]
-    body: List[MenuItem]
+    """
+    A top level component that permits displaying a navigable menu or a plain text.
+    """
+    type: str = Schema(
+        'menu',
+        description='The type of the Menu object is always "menu"',
+        const=True
+    )
+    header: str = Schema(
+        None,
+        description='The header of the menu.'
+    )
+    footer: str = Schema(
+        None,
+        description='The header of the menu.'
+    )
+    body: List[MenuItem] = Schema(
+        ...,
+        description='The body/content of the menu'
+    )
 
     @classmethod
     def from_tag(cls, section_tag: SectionTag) -> Menu:
@@ -80,11 +111,21 @@ class FormItemContentType(str, Enum):
 
 
 class FormItemContent(BaseModel):
-    type: FormItemContentType
-    name: str
-    description: str
-    header: Optional[str]
-    footer: Optional[str]
+    """
+    Component used to ask a user for a certain type of free input
+    """
+    type: FormItemContentType = Schema(
+        ...,
+        description='The type of data expected from the user'
+    )
+    name: str = Schema(
+        ...,
+        description='An identifier to be linked with the data value obtained from user. '
+                    'It has to be unique per form.'
+    )
+    description: str = Schema(..., description='The displayed text.')
+    header: str = Schema(None, description='The header of the form item')
+    footer: str = Schema(None, description='The footer of the form item')
 
     @classmethod
     def from_tag(cls, section: SectionTag) -> FormItemContent:
@@ -109,9 +150,18 @@ class FormItemMenuItemType(str, Enum):
 
 
 class FormItemMenuItem(BaseModel):
-    type: FormItemMenuItemType
-    value: Optional[str]
-    description: str
+    """
+    An item in a form's menu
+    """
+    type: FormItemMenuItemType = Schema(
+        ...,
+        description='The type of a menu item inside a form'
+    )
+    description: str = Schema(..., description='The displayed text.')
+    value: str = Schema(
+        None,
+        description='If type=option, value is used to identify the option chosen by the user'
+    )
 
     @classmethod
     def from_tag(cls, tag: Union[LiTag, PTag, BrTag, str]) -> FormItemMenuItem:
@@ -145,10 +195,20 @@ class FormItemMenuItem(BaseModel):
 
 
 class FormItemMenu(BaseModel):
-    type = 'form-menu'
-    body: List[FormItemMenuItem]
-    header: Optional[str]
-    footer: Optional[str]
+    """
+    Item in a form's body used to ask the user to select an option from a list
+    """
+    type: str = Schema(
+        'form-menu',
+        description='The type of a FormItemMenu is always form-menu',
+        const=True
+    )
+    body: List[FormItemMenuItem] = Schema(
+        ...,
+        description='A sequence of menu items containing options and/or option separators'
+    )
+    header: str = Schema(None, description='The form menu header')
+    footer: str = Schema(None, description='The form menu footer')
 
     @classmethod
     def from_tag(cls, section_tag: SectionTag) -> FormItemMenu:
@@ -168,19 +228,47 @@ class FormItemMenu(BaseModel):
 
 
 class FormMeta(BaseModel):
-    completion_status_show: Optional[bool]
-    completion_status_in_header: Optional[bool]
-    confirmation_needed: Optional[bool]
+    """
+    Configuration fields for a Form
+    """
+    completion_status_show: bool = Schema(
+        None,
+        title='Show completion status',
+        description='Whether to display the completions status'
+    )
+    completion_status_in_header: bool = Schema(
+        None,
+        title='Show completion status in header',
+        description='Whether to display the completion status in header'
+    )
+    confirmation_needed: bool = Schema(
+        None,
+        title='Confirmation needed',
+        description='Whether to add an additional item at the end of the form for confirmation'
+    )
 
 
 class Form(BaseModel):
-    type = 'form'
-    header: Optional[str]
-    footer: Optional[str]
-    meta: Optional[FormMeta]
-    method: str = 'POST'
-    path: str
-    body: List[Union[FormItemContent, FormItemMenu]]
+    """
+    A top level component used to acquire information from user
+    """
+    type: str = Schema('form', description='The type of a form is always form',
+                       const=True)
+    header: str = Schema(
+        None,
+        description='The header of the form. It can be overwritten by each body component'
+    )
+    footer: str = Schema(
+        None,
+        description='The footer of the form. It can be overwritten by each body component'
+    )
+    meta: FormMeta = Schema(None, description='Contains configuration flags')
+    method: str = Schema('POST', description='The HTTP method used to send the form data')
+    path: str = Schema(..., description='The path used to send the form data')
+    body: List[Union[FormItemContent, FormItemMenu]] = Schema(
+        ...,
+        description='Sequence of components used to acquire the pieces of data needed from user'
+    )
 
     @classmethod
     def from_tag(cls, form_tag: FormTag) -> Form:
@@ -216,8 +304,18 @@ class MessageContentType(str, Enum):
 
 
 class Response(BaseModel):
-    content_type: MessageContentType
-    content: Union[Form, Menu]
+    """
+    A JSON-serialized instance of Response must be sent as response to the ONEm platform. It can be built only from a top level object (Menu, Form).
+    """
+    content_type: MessageContentType = Schema(
+        ...,
+        title='Content type',
+        description='The type of the content of the response'
+    )
+    content: Union[Form, Menu] = Schema(
+        ...,
+        description='The content of the response'
+    )
 
     def __init__(self, **data):
         if isinstance(data['content'], Menu):

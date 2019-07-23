@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Optional, List, Union
+from typing import List, Union
 
 from pydantic import BaseModel, Schema
 
 from onemsdk.exceptions import ONEmSDKException
-from onemsdk.parser import FormTag, SectionTag, LiTag, PTag, BrTag, UlTag, ResponseType
+from onemsdk.parser import (FormTag, SectionTag, LiTag, PTag, BrTag, UlTag,
+                            ATag, HeaderTag, FooterTag, InputTag)
+from onemsdk.parser.tag import InputTagType
 
 
 class MenuItemType(str, Enum):
@@ -36,33 +38,26 @@ class MenuItem(BaseModel):
     )
 
     @classmethod
-    def from_tag(cls, tag: Union[LiTag, PTag, BrTag, str]) -> MenuItem:
+    def from_tag(cls, tag: Union[LiTag, PTag, BrTag, str]) -> Union[MenuItem, None]:
         if isinstance(tag, str):
-            menu_item = MenuItem(
-                type=MenuItemType.content,
-                description=tag,
-                method=None,
-                path=None
-            )
-            return menu_item
-
-        tag_data = tag.data()
-
-        if tag_data['href']:
-            menu_item = MenuItem(
-                type=MenuItemType.option,
-                description=tag_data['text'],
-                method=tag_data['method'],
-                path=tag_data['href']
-            )
+            description = tag
         else:
-            menu_item = MenuItem(
-                type=MenuItemType.content,
-                description=tag_data['text'],
-                method=None,
-                path=None
-            )
-        return menu_item
+            description = tag.render()
+
+        if not description:
+            return None
+
+        type = MenuItemType.content
+        method = None
+        path = None
+
+        if isinstance(tag, LiTag) and isinstance(tag.children[0], ATag):
+            atag: ATag = tag.children[0]
+            method = atag.attrs.method
+            path = atag.attrs.href
+            type = MenuItemType.option
+
+        return MenuItem(type=type, description=description, method=method, path=path)
 
 
 class Menu(BaseModel):
@@ -74,34 +69,31 @@ class Menu(BaseModel):
         description='The type of the Menu object is always "menu"',
         const=True
     )
-    header: str = Schema(
-        None,
-        description='The header of the menu.'
-    )
-    footer: str = Schema(
-        None,
-        description='The header of the menu.'
-    )
-    body: List[MenuItem] = Schema(
-        ...,
-        description='The body/content of the menu'
-    )
+    body: List[MenuItem] = Schema(..., description='The body/content of the menu')
+    header: str = Schema(None, description='The header of the menu.')
+    footer: str = Schema(None, description='The header of the menu.')
 
     @classmethod
     def from_tag(cls, section_tag: SectionTag) -> Menu:
         body = []
+        header = None
+        footer = None
+
         for child in section_tag.children:
             if isinstance(child, UlTag):
                 body.extend([MenuItem.from_tag(li) for li in child.children])
+            elif isinstance(child, HeaderTag):
+                header = child.render()
+            elif isinstance(child, FooterTag):
+                footer = child.render()
             else:
                 body.append(MenuItem.from_tag(child))
 
-        menu = Menu(
-            header=section_tag.attrs.header,
-            footer=section_tag.attrs.footer,
-            body=body
+        return Menu(
+            header=header or section_tag.attrs.header,
+            footer=footer or section_tag.attrs.footer,
+            body=list(filter(None, body))
         )
-        return menu
 
 
 class FormItemContentType(str, Enum):
@@ -129,19 +121,38 @@ class FormItemContent(BaseModel):
 
     @classmethod
     def from_tag(cls, section: SectionTag) -> FormItemContent:
+        header = None
+        footer = None
+
         content_types_map = {
-            ResponseType.date: FormItemContentType.date,
-            ResponseType.datetime: FormItemContentType.datetime,
-            ResponseType.text: FormItemContentType.string,
+            InputTagType.date: FormItemContentType.date,
+            InputTagType.datetime: FormItemContentType.datetime,
+            InputTagType.text: FormItemContentType.string
         }
-        content = FormItemContent(
-            type=content_types_map[section.attrs.expected_response.type],
-            name=section.attrs.name,
-            description=section.render(),
-            header=section.attrs.header,
-            footer=section.attrs.footer,
+
+        for child in section.children:
+            if isinstance(child, InputTag):
+                type = child.attrs.type
+                name = child.attrs.name
+                break
+        else:
+            raise ONEmSDKException(
+                'When <section> plays the role of a form item content, '
+                'it must contain a <input/>'
+            )
+
+        if isinstance(section.children[0], HeaderTag):
+            header = section.children[0].render()
+        if isinstance(section.children[-1], FooterTag):
+            footer = section.children[-1].render()
+
+        return FormItemContent(
+            type=content_types_map[type],
+            name=name,
+            description=section.render(exclude_header=True, exclude_footer=True),
+            header=header or section.attrs.header,
+            footer=footer or section.attrs.footer,
         )
-        return content
 
 
 class FormItemMenuItemType(str, Enum):
@@ -164,34 +175,25 @@ class FormItemMenuItem(BaseModel):
     )
 
     @classmethod
-    def from_tag(cls, tag: Union[LiTag, PTag, BrTag, str]) -> FormItemMenuItem:
+    def from_tag(cls, tag: Union[LiTag, PTag, BrTag, str]
+                 ) -> Union[FormItemMenuItem, None]:
+
+        type = FormItemMenuItemType.content
+        value = None
+
         if isinstance(tag, str):
-            return FormItemMenuItem(
-                type=FormItemMenuItemType.content,
-                value=None,
-                description=tag
-            )
-
-        tag_data = tag.data()
-
-        if isinstance(tag, LiTag):
-            if not tag_data['value']:
-                item_type = FormItemMenuItemType.content
-            else:
-                item_type = FormItemMenuItemType.option
-
-            menu_item = FormItemMenuItem(
-                type=item_type,
-                value=tag_data['value'],
-                description=tag_data['text']
-            )
+            description = tag
         else:
-            menu_item = FormItemMenuItem(
-                type=FormItemMenuItemType.content,
-                value=None,
-                description=tag_data['text']
-            )
-        return menu_item
+            description = tag.render()
+
+        if not description:
+            return None
+
+        if isinstance(tag, LiTag) and tag.attrs.value:
+            type = FormItemMenuItemType.option
+            value = tag.attrs.value
+
+        return FormItemMenuItem(type=type, value=value, description=description)
 
 
 class FormItemMenu(BaseModel):
@@ -213,18 +215,24 @@ class FormItemMenu(BaseModel):
     @classmethod
     def from_tag(cls, section_tag: SectionTag) -> FormItemMenu:
         body: List[FormItemMenuItem] = []
+        header = None
+        footer = None
+
         for child in section_tag.children:
             if isinstance(child, UlTag):
                 body.extend([FormItemMenuItem.from_tag(li) for li in child.children])
+            elif isinstance(child, HeaderTag):
+                header = child.render()
+            elif isinstance(child, FooterTag):
+                footer = child.render()
             else:
                 body.append(FormItemMenuItem.from_tag(child))
 
-        menu = FormItemMenu(
-            header=section_tag.attrs.header,
-            footer=section_tag.attrs.footer,
-            body=body
+        return FormItemMenu(
+            header=header or section_tag.attrs.header,
+            footer=footer or section_tag.attrs.footer,
+            body=list(filter(None, body))
         )
-        return menu
 
 
 class FormMeta(BaseModel):
@@ -254,6 +262,12 @@ class Form(BaseModel):
     """
     type: str = Schema('form', description='The type of a form is always form',
                        const=True)
+    body: List[Union[FormItemContent, FormItemMenu]] = Schema(
+        ...,
+        description='Sequence of components used to acquire the pieces of data needed from user'
+    )
+    method: str = Schema('POST', description='The HTTP method used to send the form data')
+    path: str = Schema(..., description='The path used to send the form data')
     header: str = Schema(
         None,
         description='The header of the form. It can be overwritten by each body component'
@@ -263,12 +277,6 @@ class Form(BaseModel):
         description='The footer of the form. It can be overwritten by each body component'
     )
     meta: FormMeta = Schema(None, description='Contains configuration flags')
-    method: str = Schema('POST', description='The HTTP method used to send the form data')
-    path: str = Schema(..., description='The path used to send the form data')
-    body: List[Union[FormItemContent, FormItemMenu]] = Schema(
-        ...,
-        description='Sequence of components used to acquire the pieces of data needed from user'
-    )
 
     @classmethod
     def from_tag(cls, form_tag: FormTag) -> Form:
@@ -317,28 +325,20 @@ class Response(BaseModel):
         description='The content of the response'
     )
 
-    def __init__(self, **data):
-        if isinstance(data['content'], Menu):
+    def __init__(self, content: Union[Menu, Form]):
+        if isinstance(content, Menu):
             content_type = MessageContentType.menu
-        else:
+        elif isinstance(content, Form):
             content_type = MessageContentType.form
+        else:
+            raise ONEmSDKException(f'Cannot create response from {type(content)}')
 
-        data['content_type'] = content_type
-
-        super(Response, self).__init__(**data)
+        super(Response, self).__init__(content_type=content_type, content=content)
 
     @classmethod
-    def from_tag(cls, tag: Union[FormTag, SectionTag], message_id: Optional[str] = None):
+    def from_tag(cls, tag: Union[FormTag, SectionTag]):
         if isinstance(tag, FormTag):
-            return Response(
-                message_id=message_id,
-                content_type=MessageContentType.form,
-                content=Form.from_tag(tag)
-            )
+            return Response(content=Form.from_tag(tag))
         if isinstance(tag, SectionTag):
-            return Response(
-                message_id=message_id,
-                content_type=MessageContentType.menu,
-                content=Menu.from_tag(tag)
-            )
+            return Response(content=Menu.from_tag(tag))
         raise ONEmSDKException(f'Cannot create response from {tag.Config.tag_name} tag')

@@ -48,6 +48,12 @@ components:
           description: The type of the Menu object is always "menu"
           const: menu
           type: string
+        body:
+          title: Body
+          description: The body/content of the menu
+          type: array
+          items:
+            $ref: '#/components/schemas/MenuItem'
         header:
           title: Header
           description: The header of the menu.
@@ -56,12 +62,6 @@ components:
           title: Footer
           description: The header of the menu.
           type: string
-        body:
-          title: Body
-          description: The body/content of the menu
-          type: array
-          items:
-            $ref: '#/components/schemas/MenuItem'
       required:
       - body
     FormItemContent:
@@ -139,6 +139,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/FormItemMenuItem'
+        name:
+          title: Name
+          description: An identifier to be linked with the data value obtained from
+            user. It has to be unique per form.
+          type: string
         header:
           title: Header
           description: The form menu header
@@ -149,6 +154,7 @@ components:
           type: string
       required:
       - body
+      - name
     FormMeta:
       title: FormMeta
       description: Configuration fields for a Form
@@ -177,6 +183,24 @@ components:
           description: The type of a form is always form
           const: form
           type: string
+        body:
+          title: Body
+          description: Sequence of components used to acquire the pieces of data needed
+            from user
+          type: array
+          items:
+            anyOf:
+            - $ref: '#/components/schemas/FormItemContent'
+            - $ref: '#/components/schemas/FormItemMenu'
+        method:
+          title: Method
+          description: The HTTP method used to send the form data
+          default: POST
+          type: string
+        path:
+          title: Path
+          description: The path used to send the form data
+          type: string
         header:
           title: Header
           description: The header of the form. It can be overwritten by each body
@@ -192,27 +216,9 @@ components:
           description: Contains configuration flags
           allOf:
           - $ref: '#/components/schemas/FormMeta'
-        method:
-          title: Method
-          description: The HTTP method used to send the form data
-          default: POST
-          type: string
-        path:
-          title: Path
-          description: The path used to send the form data
-          type: string
-        body:
-          title: Body
-          description: Sequence of components used to acquire the pieces of data needed
-            from user
-          type: array
-          items:
-            anyOf:
-            - $ref: '#/components/schemas/FormItemContent'
-            - $ref: '#/components/schemas/FormItemMenu'
       required:
-      - path
       - body
+      - path
     Response:
       title: Response
       description: A JSON-serialized instance of Response must be sent as response

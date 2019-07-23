@@ -17,7 +17,8 @@ class TestModel(TestCase):
                 'type': 'form',
                 'body': [
                     {
-                        'type': 'string', 'name': 'first-step',
+                        'type': 'string',
+                        'name': 'first-step',
                         'description': 'Paragraph 1 section 1',
                         'header': 'Header section 1',
                         'footer': 'Footer section 1'
@@ -46,6 +47,7 @@ class TestModel(TestCase):
                                 'value': None
                             }
                         ],
+                        'name': 'second-step',
                         'header': 'Header section 2',
                         'footer': 'Footer section 2'
                     },
@@ -83,6 +85,7 @@ class TestModel(TestCase):
                                 'value': None
                             }
                         ],
+                        'name': 'third-step',
                         'header': 'Header section 3',
                         'footer': None
                     }
@@ -297,6 +300,7 @@ class TestModel(TestCase):
                             "description": "Nice",
                             "value": "nice"
                         }],
+                        "name": "step2",
                         "header": "SETUP CITY",
                         "footer": "Reply A-D",
                     }],
@@ -315,16 +319,16 @@ class TestModel(TestCase):
 
     def test_response_from_html_form(self):
         html = """
-            <form header="Form header" confirmation-needed="true" method="PATCH" path="/route">
-                <section>
+            <form header="Form header" confirmation-needed="true" method="PATCH" action="/route">
+                <section name="step1">
                    <ul>
                        <li value="first">First item</li>
                        <li value="second">Second item</li>
                    </ul>
                 </section>
-                <section>
+                <section name="step2">
                    <label>A question</label>
-                   <input name="second-step" type="date"/>
+                   <input type="date"/>
                 </section>
             </form>
         """
@@ -337,20 +341,25 @@ class TestModel(TestCase):
                 "body": [
                     {
                         "type": "form-menu",
-                        "body": [{
-                            "type": "option",
-                            "description": "First item",
-                            "value": "first"
-                        }, {
-                            "type": "option",
-                            "description": "Second item",
-                            "value": "second"
-                        }],
+                        "body": [
+                            {
+                                "type": "option",
+                                "description": "First item",
+                                "value": "first"
+                            },
+                            {
+                                "type": "option",
+                                "description": "Second item",
+                                "value": "second"
+                            }
+                        ],
+                        "name": "step1",
                         "header": None,
                         "footer": None,
-                    }, {
+                    },
+                    {
                         "type": "date",
-                        "name": "second-step",
+                        "name": "step2",
                         "description": "A question",
                         "header": None,
                         "footer": None

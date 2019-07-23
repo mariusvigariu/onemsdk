@@ -101,7 +101,6 @@ class InputTagType(str, Enum):
 
 
 class InputTagAttrs(BaseModel):
-    name: str
     type: InputTagType
 
 
@@ -116,8 +115,7 @@ class InputTag(Tag):
 
     @classmethod
     def get_attrs(cls, node: Node):
-        return InputTagAttrs(name=node.attrs.get('name'),
-                             type=node.attrs.get('type'))
+        return InputTagAttrs(type=node.attrs.get('type'))
 
     def render(self):
         return ''
@@ -278,6 +276,7 @@ BrTag.update_forward_refs()
 class SectionTagAttrs(BaseModel):
     header: Optional[str]
     footer: Optional[str]
+    name: Optional[str]
 
 
 class SectionTag(Tag):
@@ -335,7 +334,8 @@ class SectionTag(Tag):
     @classmethod
     def get_attrs(cls, node: Node) -> SectionTagAttrs:
         return SectionTagAttrs(header=node.attrs.get('header'),
-                               footer=node.attrs.get('footer'))
+                               footer=node.attrs.get('footer'),
+                               name=node.attrs.get('name'))
 
 
 SectionTag.update_forward_refs()
@@ -344,7 +344,7 @@ SectionTag.update_forward_refs()
 class FormTagAttrs(BaseModel):
     header: Optional[str]
     footer: Optional[str]
-    path: str
+    action: str
     method: str = 'POST'
 
     completion_status_show: Optional[bool]
@@ -365,6 +365,10 @@ class FormTag(Tag):
         for child in children:
             if not isinstance(child, SectionTag):
                 raise ONEmSDKException('<form> can have only <section> children')
+            if not child.attrs.name:
+                raise ONEmSDKException('<form> can contain only named <section> tags. '
+                                       'Please add a unique "name" attribute in each form '
+                                       'section.')
 
         super(FormTag, self).__init__(attrs=attrs, children=children)
 
@@ -374,7 +378,7 @@ class FormTag(Tag):
         return FormTagAttrs(
             header=node.attrs.get('header'),
             footer=node.attrs.get('footer'),
-            path=node.attrs.get('path'),
+            action=node.attrs.get('action'),
             method=node.attrs.get('method') or 'POST',
             completion_status_show=str_bool_map[
                 node.attrs.get('completion-status-show')],

@@ -133,7 +133,6 @@ class FormItemContent(BaseModel):
         for child in section.children:
             if isinstance(child, InputTag):
                 type = child.attrs.type
-                name = child.attrs.name
                 break
         else:
             raise ONEmSDKException(
@@ -148,7 +147,7 @@ class FormItemContent(BaseModel):
 
         return FormItemContent(
             type=content_types_map[type],
-            name=name,
+            name=section.attrs.name,
             description=section.render(exclude_header=True, exclude_footer=True),
             header=header or section.attrs.header,
             footer=footer or section.attrs.footer,
@@ -209,6 +208,11 @@ class FormItemMenu(BaseModel):
         ...,
         description='A sequence of menu items containing options and/or option separators'
     )
+    name: str = Schema(
+        ...,
+        description='An identifier to be linked with the data value obtained from user. '
+                    'It has to be unique per form.'
+    )
     header: str = Schema(None, description='The form menu header')
     footer: str = Schema(None, description='The form menu footer')
 
@@ -229,9 +233,10 @@ class FormItemMenu(BaseModel):
                 body.append(FormItemMenuItem.from_tag(child))
 
         return FormItemMenu(
+            body=list(filter(None, body)),
+            name=section_tag.attrs.name,
             header=header or section_tag.attrs.header,
             footer=footer or section_tag.attrs.footer,
-            body=list(filter(None, body))
         )
 
 
@@ -300,7 +305,7 @@ class Form(BaseModel):
                 confirmation_needed=form_tag.attrs.confirmation_needed
             ),
             method=form_tag.attrs.method,
-            path=form_tag.attrs.path,
+            path=form_tag.attrs.action,
             body=body
         )
         return form

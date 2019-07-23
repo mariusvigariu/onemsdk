@@ -80,8 +80,7 @@ class TestTags(TestCase):
         self.assertListEqual([], br_tag.children)
 
     def test_input_tag(self):
-        input_tag = InputTag(attrs=InputTagAttrs(name='thename', type='text'))
-        self.assertEqual('thename', input_tag.attrs.name)
+        input_tag = InputTag(attrs=InputTagAttrs(type='text'))
         self.assertEqual('text', input_tag.attrs.type)
 
     def test_section_tag(self):

@@ -1,12 +1,10 @@
 from __future__ import annotations
 
-import datetime
 import inspect
-import json
 import sys
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import List, Union, Type, Optional, Tuple, Dict, Any, Callable, cast
+from typing import List, Union, Type, Optional, Dict, Any
 
 from pydantic import BaseModel
 
@@ -15,182 +13,168 @@ from .node import Node
 
 __all__ = ['Tag', 'HeaderTag', 'FooterTag', 'BrTag', 'UlTag', 'LiTag', 'FormTag',
            'SectionTag', 'InputTagAttrs', 'InputTag', 'FormTagAttrs', 'PTag', 'ATag',
-           'ATagAttrs', 'get_tag_cls', 'SectionTagAttrs', 'LiTagAttrs', 'ResponseType']
+           'ATagAttrs', 'get_tag_cls', 'SectionTagAttrs', 'LiTagAttrs', 'InputTagType']
 
 
 class Tag(BaseModel, ABC):
-    children: List[Union[Tag, str]]
+    class Config:
+        tag_name: str = None
 
-    def __init__(self, **data):
-        children: List[Union[Tag, str]] = data.pop('children', None) or []
-
-        min_children, max_children = self.Config.children_count
-
-        if min_children is None:
-            min_children = 0
-        if max_children is None:
-            max_children = 1000
-
-        if not min_children <= len(children) <= max_children:
-            if min_children == max_children:
-                error = (f'<{self.Config.tag_name}> must have {min_children} children. '
-                         f'Children: {len(children)}')
-            else:
-                error = (f'<{self.Config.tag_name}> must have between {min_children} '
-                         f'and {max_children} children. Children: {len(children)}')
-            raise ONEmSDKException(error)
-
-        supported_children_types = tuple(self.Config.children_types)
-
-        if children:
-            for child in children:
-                if not isinstance(child, supported_children_types):
-                    raise ONEmSDKException(
-                        f'<{child.Config.tag_name}> cannot be child for <{self.Config.tag_name}>')
-        else:
-            if supported_children_types:
-                raise ONEmSDKException(f'<{self.Config.tag_name}> cannot be empty')
-
-        super(Tag, self).__init__(**data, children=children)
+    attrs: Any = None
+    children: List[Union[Tag, str]] = []
 
     @abstractmethod
     def render(self) -> str:
         pass
 
     @classmethod
-    @abstractmethod
-    def from_node(cls: Type[Tag], node: Node) -> Tag:
-        pass
-
-    @abstractmethod
-    def data(self) -> Dict[str, str]:
-        pass
-
-    def json_data(self, encoder: Optional[Callable[[Any], Any]] = None, **dumps_kwargs):
-        encoder = cast(Callable[[Any], Any], encoder or self._json_encoder)
-        return json.dumps(self.data(), default=encoder, **dumps_kwargs)
-
-    class Config:
-        can_be_root: bool = False
-        tag_name: str = None
-        children_types: List[Union[Type[Tag], Type[str]]] = None
-        children_count: Tuple[int, int] = None
-
-
-class HeaderTag(Tag):
-    def render(self):
-        return self.children[0] + '\n'
-
-    @classmethod
-    def from_node(cls, node: Node) -> HeaderTag:
+    def from_node(cls, node: Node) -> Tag:
         if node.tag != cls.Config.tag_name:
             raise NodeTagMismatchException(
                 f'Expected tag <{cls.Config.tag_name}>, received <{node.tag}>')
-        children = node.children.copy()
-        return cls(children=children)
+
+        attrs = cls.get_attrs(node)
+        children = []
+
+        for node_child in node.children:
+            if isinstance(node_child, str):
+                children.append(node_child)
+            else:
+                child_tag_cls = get_tag_cls(node_child.tag)
+                children.append(child_tag_cls.from_node(node_child))
+
+        return cls(attrs=attrs, children=children)
+
+    @classmethod
+    def get_attrs(cls, node: Node):
+        return None
+
+
+class HeaderTag(Tag):
+    class Config:
+        tag_name = 'header'
+
+    def __init__(self, children: List[str] = None, **data):
+        children = children or []
+        if len(children) > 1 or children and not isinstance(children[0], str):
+            raise ONEmSDKException('<header> must have max 1 text child')
+        super(HeaderTag, self).__init__(children=children)
+
+    def render(self):
+        if len(self.children) == 1:
+            return self.children[0]
+        return ''
 
     def data(self):
         return None
-
-    class Config:
-        can_be_root: bool = False
-        tag_name = 'header'
-        children_types = [str]
-        children_count = (1, 1)
 
 
 HeaderTag.update_forward_refs()
 
 
 class FooterTag(Tag):
+    class Config:
+        tag_name = 'footer'
+
+    def __init__(self, children: List[str] = None, **data):
+        children = children or []
+        if len(children) > 1 or children and not isinstance(children[0], str):
+            raise ONEmSDKException('<footer> must have max 1 text child')
+        super(FooterTag, self).__init__(children=children)
 
     def render(self):
-        return self.children[0]
-
-    @classmethod
-    def from_node(cls, node: Node) -> FooterTag:
-        if node.tag != cls.Config.tag_name:
-            raise NodeTagMismatchException(
-                f'Expected tag <{cls.Config.tag_name}>, received <{node.tag}>')
-        children = node.children.copy()
-        return cls(children=children)
+        if len(self.children) == 1:
+            return self.children[0]
+        return ''
 
     def data(self):
         return None
-
-    class Config:
-        can_be_root: bool = False
-        tag_name = 'footer'
-        children_types = [str]
-        children_count = (1, 1)
 
 
 FooterTag.update_forward_refs()
 
 
+class InputTagType(str, Enum):
+    text = 'text'
+    date = 'date'
+    datetime = 'datetime'
+
+
 class InputTagAttrs(BaseModel):
     name: str
-    type: str
+    type: InputTagType
 
 
 class InputTag(Tag):
+    class Config:
+        tag_name = 'input'
+
     attrs: InputTagAttrs
+
+    def __init__(self, attrs: InputTagAttrs, **data):
+        super(InputTag, self).__init__(attrs=attrs)
+
+    @classmethod
+    def get_attrs(cls, node: Node):
+        return InputTagAttrs(name=node.attrs.get('name'),
+                             type=node.attrs.get('type'))
 
     def render(self):
         return ''
 
-    @classmethod
-    def from_node(cls, node: Node) -> InputTag:
-        if node.tag != cls.Config.tag_name:
-            raise NodeTagMismatchException(
-                f'Expected tag <{cls.Config.tag_name}>, received <{node.tag}>')
-        attrs = InputTagAttrs(**node.attrs)
-        return cls(attrs=attrs, children=node.children)
-
     def data(self) -> Optional[Dict[str, str]]:
         return None
-
-    class Config:
-        can_be_root: bool = False
-        tag_name = 'input'
-        children_types = []
-        children_count = (0, 0)
 
 
 InputTag.update_forward_refs()
 
 
-class ATagAttrs(BaseModel):
-    href: str
-    method: str = 'POST'
+class LabelTag(Tag):
+    class Config:
+        tag_name = 'label'
 
-
-class ATag(Tag):
-    attrs: ATagAttrs
+    def __init__(self, children: List[str] = None, **data):
+        children = children or []
+        if len(children) > 1 or children and not isinstance(children[0], str):
+            raise ONEmSDKException('<label> must have max 1 text child')
+        super(LabelTag, self).__init__(children=children)
 
     def render(self):
         return self.children[0]
 
+
+LabelTag.update_forward_refs()
+
+
+class ATagAttrs(BaseModel):
+    href: str
+    method: Optional[str] = 'GET'
+
+
+class ATag(Tag):
+    class Config:
+        tag_name: str = 'a'
+
+    attrs: ATagAttrs
+
+    def __init__(self, attrs: ATagAttrs, children: List[str]):
+        if len(children) != 1 or not isinstance(children[0], str):
+            raise ONEmSDKException('<a> must have 1 text child')
+        super(ATag, self).__init__(attrs=attrs, children=children)
+
     @classmethod
-    def from_node(cls, node: Node) -> ATag:
-        if node.tag != cls.Config.tag_name:
-            raise NodeTagMismatchException(
-                f'Expected tag <{cls.Config.tag_name}>, received <{node.tag}>')
-        attrs = ATagAttrs(**node.attrs)
-        children = node.children.copy()
-        return cls(attrs=attrs, children=children)
+    def get_attrs(cls, node: Node) -> ATagAttrs:
+        return ATagAttrs(href=node.attrs.get('href'),
+                         method=node.attrs.get('method') or 'GET')
+
+    def render(self):
+        return self.children[0]
 
     def data(self) -> Dict[str, str]:
         return {
             **self.attrs.dict(),
             'text': self.children[0]
         }
-
-    class Config:
-        can_be_root: bool = False
-        tag_name = 'a'
-        children_types = [str]
-        children_count = (1, 1)
 
 
 ATag.update_forward_refs()
@@ -201,103 +185,63 @@ class LiTagAttrs(BaseModel):
 
 
 class LiTag(Tag):
+    class Config:
+        tag_name = 'li'
+
     attrs: LiTagAttrs
 
-    def __init__(self, **data):
-        if 'attrs' not in data:
-            data['attrs'] = LiTagAttrs()
-        super().__init__(**data)
+    def __init__(self, children: List[Union[ATag, str]], attrs: LiTagAttrs = None):
+        if len(children) != 1 or not isinstance(children[0], (str, ATag)):
+            raise ONEmSDKException('<li> must have 1 (text or <a>) child')
+
+        if attrs is None:
+            attrs = LiTagAttrs()
+
+        super(LiTag, self).__init__(attrs=attrs, children=children)
+
+    @classmethod
+    def get_attrs(cls, node: Node):
+        return LiTagAttrs(value=node.attrs.get('value'))
 
     def render(self):
         if isinstance(self.children[0], ATag):
-            return self.children[0].render() + '\n'
-        return self.children[0] + '\n'
-
-    @classmethod
-    def from_node(cls, node: Node) -> LiTag:
-        if node.tag != cls.Config.tag_name:
-            raise NodeTagMismatchException(
-                f'Expected tag <{cls.Config.tag_name}>, received <{node.tag}>')
-
-        children: List[Union[ATag, str]] = []
-
-        for node_child in node.children:
-            if isinstance(node_child, str):
-                children.append(node_child)
-            elif isinstance(node_child, Node):
-                tag_cls = get_tag_cls(node_child.tag)
-                tag_obj = tag_cls.from_node(node_child)
-                children.append(tag_obj)
-            else:
-                raise Exception(f'Unknown node type: {type(node)}')
-
-        if node.attrs:
-            attrs = LiTagAttrs(**node.attrs)
-            return cls(children=children, attrs=attrs)
-        return cls(children=children)
-
-    def data(self) -> Dict[str, str]:
-        if isinstance(self.children[0], str):
-            return {
-                **self.attrs.dict(),
-                'href': None,
-                'method': None,
-                'text': self.children[0]
-            }
-        return {
-            **self.attrs.dict(),
-            **self.children[0].data()
-        }
-
-    class Config:
-        can_be_root: bool = False
-        tag_name = 'li'
-        children_types = [ATag, str]
-        children_count = (1, 1)
+            return self.children[0].render()
+        return self.children[0]
 
 
 LiTag.update_forward_refs()
 
 
 class UlTag(Tag):
-    def render(self):
-        return ''.join([child.render() for child in self.children])
-
-    @classmethod
-    def from_node(cls, node: Node) -> UlTag:
-        if node.tag != cls.Config.tag_name:
-            raise NodeTagMismatchException(
-                f'Expected tag <{cls.Config.tag_name}>, received <{node.tag}>')
-
-        children = [get_tag_cls(child.tag).from_node(child) for child in node.children]
-        return cls(children=children)
-
-    def data(self):
-        return [
-            child.data() for child in self.children
-        ]
-
     class Config:
-        can_be_root: bool = False
         tag_name = 'ul'
-        children_types = [LiTag]
-        children_count = (1, None)
+
+    def __init__(self, children: List[LiTag], **data):
+        if not children or not isinstance(children[0], LiTag):
+            raise ONEmSDKException('<ul> must have min 1 <li> child')
+        super(UlTag, self).__init__(children=children)
+
+    def render(self):
+        return '\n'.join([child.render() for child in self.children])
 
 
 UlTag.update_forward_refs()
 
 
 class PTag(Tag):
-    def render(self):
-        return f'{self.children[0]}\n'
+    class Config:
+        tag_name = 'p'
 
-    @classmethod
-    def from_node(cls, node: Node) -> PTag:
-        if node.tag != cls.Config.tag_name:
-            raise NodeTagMismatchException(
-                f'Expected tag <{cls.Config.tag_name}>, received <{node.tag}>')
-        children = node.children.copy()
-        return cls(children=children)
+    def __init__(self, children: List[str] = None, **data):
+        children = children or []
+        if len(children) > 1 or children and not isinstance(children[0], str):
+            raise ONEmSDKException('<p> must have max 1 text child')
+        super(PTag, self).__init__(children=children)
+
+    def render(self):
+        if len(self.children) == 1:
+            return self.children[0]
+        return ''
 
     def data(self):
         return {
@@ -306,27 +250,19 @@ class PTag(Tag):
             'data': None
         }
 
-    class Config:
-        can_be_root: bool = False
-        tag_name = 'p'
-        children_types = [str]
-        children_count = (1, 1)
-
 
 PTag.update_forward_refs()
 
 
 class BrTag(Tag):
+    class Config:
+        tag_name = 'br'
+
+    def __init__(self, **data):
+        super(BrTag, self).__init__()
 
     def render(self):
         return '\n'
-
-    @classmethod
-    def from_node(cls, node: Node) -> BrTag:
-        if node.tag != cls.Config.tag_name:
-            raise NodeTagMismatchException(
-                f'Expected tag <{cls.Config.tag_name}>, received <{node.tag}>')
-        return cls(children=node.children)
 
     def data(self):
         return {
@@ -335,121 +271,71 @@ class BrTag(Tag):
             'href': None
         }
 
-    class Config:
-        can_be_root: bool = False
-        tag_name = 'br'
-        children_types = []
-        children_count = (0, 0)
-
 
 BrTag.update_forward_refs()
 
 
-class ResponseType(str, Enum):
-    option_data = 'option-data'
-    text = 'text'
-    datetime = 'datetime'
-    date = 'date'
-
-
-class ResponseDescription(BaseModel):
-    type: ResponseType = ResponseType.text
-
-    gt: Optional[int]
-    lt: Optional[Union[int, float, datetime.datetime, datetime.date]]
-
-
 class SectionTagAttrs(BaseModel):
-    name: Optional[str]  # Identifier for platform response
     header: Optional[str]
     footer: Optional[str]
-    # if ``expected_response`` is `None`, the next SMS must be preceded by #SERVICE
-    expected_response: Optional[ResponseDescription] = ResponseDescription()
 
 
 class SectionTag(Tag):
+    class Config:
+        tag_name = 'section'
+
     attrs: SectionTagAttrs
 
-    def __init__(self, **data):
-        super(SectionTag, self).__init__(**data)
+    def __init__(self, attrs: SectionTagAttrs = None, children: List = None):
+        children = children or []
+        allowed_children = (FooterTag, HeaderTag, UlTag, PTag,
+                            InputTag, LabelTag, BrTag, str)
 
-        header_pos = [t[0] for t in enumerate(self.children) if
-                      isinstance(t[1], HeaderTag)]
-        if len(header_pos) > 1:
-            raise ONEmSDKException('1 <header> per <section> permitted')
-        if header_pos and header_pos[0] != 0:
-            raise ONEmSDKException('<header> must be first in a <section>')
+        for child in children:
+            if not isinstance(child, allowed_children):
+                raise ONEmSDKException(
+                    f'<{child.Config.tag_name}> cannot be child for <section>')
 
-        footer_pos = [t[0] for t in enumerate(self.children) if
-                      isinstance(t[1], FooterTag)]
-        if len(footer_pos) > 1:
-            raise ONEmSDKException('1 <footer> per <section> permitted')
-        if footer_pos and footer_pos[0] != len(self.children) - 1:
-            raise ONEmSDKException('<footer> must be last in a <section>')
+        super(SectionTag, self).__init__(attrs=attrs, children=children)
 
-        if len(self.children) - len(header_pos) - len(footer_pos) < 1:
-            raise ONEmSDKException('<section> must contain a body')
+    def render(self, exclude_header: bool = False, exclude_footer: bool = False):
+        # Add a temporary \n for help
+        rendered_children = ['\n']
 
-        # if <header> and <footer> are present, override the attributes with them
-        if footer_pos:
-            footer = self.children[footer_pos[0]].children[0]
-            del self.children[footer_pos[0]]
-            self.attrs.footer = footer
-        if header_pos:
-            header = self.children[header_pos[0]].children[0]
-            del self.children[header_pos[0]]
-            self.attrs.header = header
-
-    def render(self):
-        rendered_children = []
         for child in self.children:
+            if isinstance(child, HeaderTag) and exclude_header:
+                # Do not include header
+                continue
+            if isinstance(child, FooterTag) and exclude_footer:
+                # Do not include footer
+                continue
+
             if isinstance(child, str):
-                rendered_children.append(child)
+                text = child
             else:
-                rendered_children.append(child.render())
+                text = child.render()
+
+            if text:
+                if isinstance(child, PTag) or isinstance(child, UlTag):
+                    if rendered_children[-1] != '\n':
+                        rendered_children.append('\n')
+                    rendered_children.append(text)
+                    rendered_children.append('\n')
+                else:
+                    rendered_children.append(text)
+
+        if rendered_children[-1] == '\n':
+            del rendered_children[-1]
+
+        # Remove the temporary \n
+        del rendered_children[0]
+
         return ''.join(rendered_children)
 
     @classmethod
-    def from_node(cls, node: Node) -> SectionTag:
-        if node.tag != cls.Config.tag_name:
-            raise NodeTagMismatchException(
-                f'Expected tag <{cls.Config.tag_name}>, received <{node.tag}>')
-
-        tag_children: List[Union[Tag, str]] = []
-
-        for node_child in node.children:
-            if isinstance(node_child, str):
-                tag_children.append(node_child)
-            else:
-                tag_cls = get_tag_cls(node_child.tag)
-                tag_child = tag_cls.from_node(node_child)
-                tag_children.append(tag_child)
-
-        attrs = SectionTagAttrs(**node.attrs)
-
-        return cls(children=tag_children, attrs=attrs)
-
-    def data(self):
-        data = []
-        children_data = [child.data() for child in self.children]
-        for child_data in children_data:
-            if child_data is None:
-                continue
-            if isinstance(child_data, list):
-                data.extend(child_data)
-            else:
-                data.append(child_data)
-        return {
-            **self.attrs.dict(),
-            'is_form': False,
-            'body': data,
-        }
-
-    class Config:
-        can_be_root = True
-        tag_name = 'section'
-        children_types = [FooterTag, HeaderTag, UlTag, PTag, InputTag, BrTag, str]
-        children_count = (1, None)
+    def get_attrs(cls, node: Node) -> SectionTagAttrs:
+        return SectionTagAttrs(header=node.attrs.get('header'),
+                               footer=node.attrs.get('footer'))
 
 
 SectionTag.update_forward_refs()
@@ -461,39 +347,45 @@ class FormTagAttrs(BaseModel):
     path: str
     method: str = 'POST'
 
-    completion_status_show: bool = True
-    completion_status_in_header: bool = True
-    confirmation_needed: bool = False
+    completion_status_show: Optional[bool]
+    completion_status_in_header: Optional[bool]
+    confirmation_needed: Optional[bool]
 
 
 class FormTag(Tag):
+    class Config:
+        tag_name = 'form'
+
     attrs: FormTagAttrs
     children: List[SectionTag]
 
-    def render(self):
-        return '\n'.join([child.render() for child in self.children])
+    def __init__(self, attrs: FormTagAttrs, children: List[SectionTag]):
+        if not children:
+            raise ONEmSDKException('<form> must have at least 1 child')
+        for child in children:
+            if not isinstance(child, SectionTag):
+                raise ONEmSDKException('<form> can have only <section> children')
+
+        super(FormTag, self).__init__(attrs=attrs, children=children)
 
     @classmethod
-    def from_node(cls, node: Node) -> FormTag:
-        if node.tag != cls.Config.tag_name:
-            raise NodeTagMismatchException(
-                f'Expected tag <{cls.Config.tag_name}>, received <{node.tag}>')
-        children = [get_tag_cls(child.tag).from_node(child) for child in node.children]
-        attrs = FormTagAttrs(**node.attrs)
-        return cls(children=children, attrs=attrs)
+    def get_attrs(cls, node: Node):
+        str_bool_map = {'true': True, 'false': False, None: None}
+        return FormTagAttrs(
+            header=node.attrs.get('header'),
+            footer=node.attrs.get('footer'),
+            path=node.attrs.get('path'),
+            method=node.attrs.get('method') or 'POST',
+            completion_status_show=str_bool_map[
+                node.attrs.get('completion-status-show')],
+            completion_status_in_header=str_bool_map[
+                node.attrs.get('completion-status-in-header')],
+            confirmation_needed=str_bool_map[
+                node.attrs.get('confirmation-needed')]
+        )
 
-    def data(self):
-        return {
-            'is_form': True,
-            **self.attrs.dict(),
-            'body': [child.data() for child in self.children]
-        }
-
-    class Config:
-        can_be_root = True
-        tag_name = 'form'
-        children_types = [SectionTag]
-        children_count = (1, None)
+    def render(self):
+        return '\n'.join([child.render() for child in self.children])
 
 
 FormTag.update_forward_refs()

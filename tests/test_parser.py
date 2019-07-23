@@ -43,7 +43,7 @@ class TestParser(TestCase):
 
         first_section = node.children[0]
         self.assertEqual('section', first_section.tag)
-        self.assertEqual(3, len(first_section.children))
+        self.assertEqual(4, len(first_section.children))
 
         first_header = first_section.children[0]
         self.assertEqual('header', first_header.tag)
@@ -94,7 +94,7 @@ class TestParser(TestCase):
                 {'data': 'opt-33', 'href': 'route-3', 'desc': 'Option 3 section 3'},
             ]
         }
-        rendered_html = _load_template('index.j2', **data)
+        rendered_html = _load_template('index.jinja2', **data)
         with open('index.html', mode='r') as f:
             html = f.read()
 

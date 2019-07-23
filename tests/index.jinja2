@@ -1,11 +1,12 @@
 <form path="/path-1" header="Parent header">
-  <section name="first-step">
+  <section>
     <header>Header section 1</header>
     <p>Paragraph 1 section 1</p>
+    <input name="first-step" type="text"/>
     <footer>Footer section 1</footer>
   </section>
 
-  <section name="second-step">
+  <section>
     <header>Header section 2</header>
     <ul>
       <li>Separator 1 section 2</li>
@@ -16,7 +17,7 @@
     <footer>Footer section 2</footer>
   </section>
 
-  <section name="{{ section['3']['name'] }}">
+  <section>
     <header>Header section 3</header>
     <p>Paragraph 1 section 3</p>
     <ul>{% for item in items %}

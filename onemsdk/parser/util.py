@@ -4,9 +4,9 @@ from typing import Union, TypeVar
 
 import jinja2
 
-from onemsdk.exceptions import MalformedHTMLException, ONEmSDKException
+from onemsdk.exceptions import MalformedHTMLException
 from onemsdk.parser.node import Node
-from onemsdk.parser.tag import get_tag_cls, Tag, SectionTag, FormTag
+from onemsdk.parser.tag import get_tag_cls, Tag
 
 __all__ = ['load_html', 'load_template']
 
@@ -87,24 +87,14 @@ def build_node(html: str) -> Node:
     return parser.node
 
 
-def get_root_tag(node: Node) -> Tag:
-    tag_cls = get_tag_cls(node.tag)
-
-    if tag_cls.Config.can_be_root:
-        return tag_cls.from_node(node)
-
-    raise ONEmSDKException(f'Invalid root node <{node.tag}>')
-
-
-def load_html(*, html_file: str = None, html_str: str = None
-              ) -> Union[SectionTag, FormTag]:
+def load_html(*, html_file: str = None, html_str: str = None) -> Tag:
     if html_file:
         with open(html_file, 'r') as f:
             html_str = f.read()
 
     node = build_node(html_str)
-    root_tag = get_root_tag(node)
-    return root_tag
+    tag_cls = get_tag_cls(node.tag)
+    return tag_cls.from_node(node)
 
 
 def _load_template(template_file: str, **data) -> str:
@@ -113,5 +103,5 @@ def _load_template(template_file: str, **data) -> str:
     return renv.get_template(template_file).render(data)
 
 
-def load_template(template_file: str, **data) -> Union[SectionTag, FormTag]:
+def load_template(template_file: str, **data) -> Tag:
     return load_html(html_str=_load_template(template_file, **data))

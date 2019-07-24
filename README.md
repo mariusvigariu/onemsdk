@@ -122,7 +122,7 @@ def handle_request_with_template(request):
     }
     
     # Turn the HTML template into Python object
-    root_tag = load_template(template_file="menu.j2", **data)
+    root_tag = load_template(template_file="menu.jinja2", **data)
 
     # Turn the tag object into a Response object compatible with the JSON schema
     response = Response.from_tag(root_tag)
@@ -192,22 +192,19 @@ def handle_request_with_object_tags(request):
 
 #### Using Python higher level objects
 ```python
-from onemsdk.schema.v1 import Response, Menu, MenuItem, MenuItemType
+from onemsdk.schema.v1 import Response, Menu, MenuItem
 
 
 def handle_request_with_object_tags(request):
 
     menu_items = [
-        MenuItem(type=MenuItemType.option,
-                 description='First item',
+        MenuItem(description='First item',
                  method='GET',
                  path='/callback-url/item1'),
-        MenuItem(type=MenuItemType.option,
-                 description='Second item',
+        MenuItem(description='Second item',
                  method='GET',
                  path='/callback-url/item2'),
-        MenuItem(type=MenuItemType.option,
-                 description='Third item',
+        MenuItem(description='Third item',
                  method='POST',
                  path='/callback-url/item3')
     ]
@@ -216,9 +213,6 @@ def handle_request_with_object_tags(request):
 
     # Wrap the Menu object into a Response object compatible with the JSON schema
     response = Response(content=menu)
-
-    # Optionally add the corr_id received in request to response
-    response.corr_id = 'request correlation id'
 
     # Jsonify the response and send it the over the wire
     return response.json()
@@ -230,11 +224,9 @@ All the above 3 methods of creating the menu will generate the same JSON respons
 
 ```json
 {
-  "corr_id": "request correlation id",
   "content_type": "menu",
   "content": {
-    "header": "my menu",
-    "footer": "Reply A-C",
+    "type": "menu",
     "body": [
       {
         "type": "option",
@@ -255,7 +247,8 @@ All the above 3 methods of creating the menu will generate the same JSON respons
         "path": "/callback-url/item3"
       }
     ],
-    "type": "menu"
+    "header": "my menu",
+    "footer": "Reply A-C"
   }
 }
 ```

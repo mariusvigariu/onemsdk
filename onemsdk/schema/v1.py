@@ -37,6 +37,14 @@ class MenuItem(BaseModel):
         description='The path called when the menu item is selected.'
     )
 
+    def __init__(self, description: str, method: str = None, path: str = None):
+        if path:
+            type = MenuItemType.option
+        else:
+            type = MenuItemType.content
+        super(MenuItem, self).__init__(type=type, description=description, method=method,
+                                       path=path)
+
     @classmethod
     def from_tag(cls, tag: Union[LiTag, PTag, BrTag, str]) -> Union[MenuItem, None]:
         if isinstance(tag, str):
@@ -47,7 +55,6 @@ class MenuItem(BaseModel):
         if not description:
             return None
 
-        type = MenuItemType.content
         method = None
         path = None
 
@@ -55,9 +62,8 @@ class MenuItem(BaseModel):
             atag: ATag = tag.children[0]
             method = atag.attrs.method
             path = atag.attrs.href
-            type = MenuItemType.option
 
-        return MenuItem(type=type, description=description, method=method, path=path)
+        return MenuItem(description=description, method=method, path=path)
 
 
 class Menu(BaseModel):
@@ -72,6 +78,9 @@ class Menu(BaseModel):
     body: List[MenuItem] = Schema(..., description='The body/content of the menu')
     header: str = Schema(None, description='The header of the menu.')
     footer: str = Schema(None, description='The header of the menu.')
+
+    def __init__(self, body: List[MenuItem], header: str = None, footer: str = None):
+        super(Menu, self).__init__(type='menu', body=body, header=header, footer=footer)
 
     @classmethod
     def from_tag(cls, section_tag: SectionTag) -> Menu:
@@ -90,9 +99,9 @@ class Menu(BaseModel):
                 body.append(MenuItem.from_tag(child))
 
         return Menu(
+            body=list(filter(None, body)),
             header=header or section_tag.attrs.header,
             footer=footer or section_tag.attrs.footer,
-            body=list(filter(None, body))
         )
 
 
@@ -118,6 +127,12 @@ class FormItemContent(BaseModel):
     description: str = Schema(..., description='The displayed text.')
     header: str = Schema(None, description='The header of the form item')
     footer: str = Schema(None, description='The footer of the form item')
+
+    def __init__(self, type: FormItemContentType, name: str, description: str,
+                 header: str = None, footer: str = None):
+        super(FormItemContent, self).__init__(
+            type=type, name=name, description=description, header=header, footer=footer
+        )
 
     @classmethod
     def from_tag(cls, section: SectionTag) -> FormItemContent:
@@ -173,11 +188,18 @@ class FormItemMenuItem(BaseModel):
         description='If type=option, value is used to identify the option chosen by the user'
     )
 
+    def __init__(self, description: str, value: str = None):
+        if value:
+            type = FormItemMenuItemType.option
+        else:
+            type = FormItemMenuItemType.content
+        super(FormItemMenuItem, self).__init__(
+            type=type, description=description, value=value
+        )
+
     @classmethod
     def from_tag(cls, tag: Union[LiTag, PTag, BrTag, str]
                  ) -> Union[FormItemMenuItem, None]:
-
-        type = FormItemMenuItemType.content
         value = None
 
         if isinstance(tag, str):
@@ -189,10 +211,9 @@ class FormItemMenuItem(BaseModel):
             return None
 
         if isinstance(tag, LiTag) and tag.attrs.value:
-            type = FormItemMenuItemType.option
             value = tag.attrs.value
 
-        return FormItemMenuItem(type=type, value=value, description=description)
+        return FormItemMenuItem(value=value, description=description)
 
 
 class FormItemMenu(BaseModel):
@@ -215,6 +236,12 @@ class FormItemMenu(BaseModel):
     )
     header: str = Schema(None, description='The form menu header')
     footer: str = Schema(None, description='The form menu footer')
+
+    def __init__(self, body: List[FormItemMenuItem], name: str, header: str = None,
+                 footer: str = None):
+        super(FormItemMenu, self).__init__(
+            type='form-menu', body=body, name=name, header=header, footer=footer
+        )
 
     @classmethod
     def from_tag(cls, section_tag: SectionTag) -> FormItemMenu:
@@ -260,6 +287,15 @@ class FormMeta(BaseModel):
         description='Whether to add an additional item at the end of the form for confirmation'
     )
 
+    def __init__(self, completion_status_show: bool = None,
+                 completion_status_in_header: bool = None,
+                 confirmation_needed: bool = None):
+        super(FormMeta, self).__init__(
+            completion_status_in_header=completion_status_in_header,
+            completion_status_show=completion_status_show,
+            confirmation_needed=confirmation_needed
+        )
+
 
 class Form(BaseModel):
     """
@@ -282,6 +318,12 @@ class Form(BaseModel):
         description='The footer of the form. It can be overwritten by each body component'
     )
     meta: FormMeta = Schema(None, description='Contains configuration flags')
+
+    def __init__(self, body: List[Union[FormItemContent, FormItemMenu]], path: str,
+                 meta: FormMeta, method: str = 'POST', header: str = None,
+                 footer: str = None, ):
+        super(Form, self).__init__(type='form', body=body, method=method, path=path,
+                                   header=header, footer=footer, meta=meta)
 
     @classmethod
     def from_tag(cls, form_tag: FormTag) -> Form:

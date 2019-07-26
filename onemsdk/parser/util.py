@@ -1,10 +1,11 @@
-import os
 from html.parser import HTMLParser
+from pathlib import Path
 from typing import Union, TypeVar
 
 import jinja2
 
-from onemsdk.exceptions import MalformedHTMLException
+from onemsdk.config import get_static_dir
+from onemsdk.exceptions import MalformedHTMLException, ONEmSDKException
 from onemsdk.parser.node import Node
 from onemsdk.parser.tag import get_tag_cls, Tag
 
@@ -89,7 +90,14 @@ def build_node(html: str) -> Node:
 
 def load_html(*, html_file: str = None, html_str: str = None) -> Tag:
     if html_file:
-        with open(html_file, 'r') as f:
+        html_file_path = Path(html_file)
+        if not html_file_path.is_absolute():
+            static_dir = get_static_dir()
+
+            if static_dir:
+                html_file_path = Path(static_dir).joinpath(html_file_path)
+
+        with open(str(html_file_path), 'r') as f:
             html_str = f.read()
 
     node = build_node(html_str)
@@ -97,10 +105,28 @@ def load_html(*, html_file: str = None, html_str: str = None) -> Tag:
     return tag_cls.from_node(node)
 
 
+_jinja_env = None
+
+
 def _load_template(template_file: str, **data) -> str:
-    dir = os.path.dirname(os.path.abspath(template_file))
-    renv = jinja2.Environment(loader=jinja2.FileSystemLoader(dir))
-    return renv.get_template(template_file).render(data)
+    global _jinja_env
+
+    template_file_path = Path(template_file)
+    static_dir = get_static_dir()
+
+    if not _jinja_env and static_dir:
+        _jinja_env = jinja2.Environment(
+            loader=jinja2.FileSystemLoader(str(static_dir))
+        )
+
+    if _jinja_env:
+        return _jinja_env.get_template(template_file).render(data)
+
+    static_dir_ = str(template_file_path.parent.absolute())
+
+    return jinja2.Environment(
+        loader=jinja2.FileSystemLoader(static_dir_)
+    ).get_template(template_file_path.name).render(data)
 
 
 def load_template(template_file: str, **data) -> Tag:

@@ -1,6 +1,10 @@
+import os
 from unittest import TestCase
 
 from onemsdk.parser.util import build_node, _load_template
+from onemsdk import set_static_dir
+
+set_static_dir(os.path.join(os.path.dirname(__file__), 'static'))
 
 
 class TestParser(TestCase):
@@ -34,7 +38,7 @@ class TestParser(TestCase):
         self.assertEqual('input-name', node.children[1].children[1].attrs['name'])
 
     def test_build_node_big(self):
-        filename = 'index.html'
+        filename = 'tests/static/index.html'
         with open(filename, mode="r") as f:
             html = f.read()
             node = build_node(html)
@@ -95,7 +99,7 @@ class TestParser(TestCase):
             ]
         }
         rendered_html = _load_template('index.jinja2', **data)
-        with open('index.html', mode='r') as f:
+        with open('tests/static/index.html', mode='r') as f:
             html = f.read()
 
         self.assertEqual(html, rendered_html)

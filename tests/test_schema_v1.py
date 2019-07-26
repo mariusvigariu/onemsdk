@@ -1,9 +1,13 @@
 import json
+import os
 from unittest import TestCase
 
+from onemsdk import set_static_dir
 from onemsdk.parser import SectionTag
 from onemsdk.parser.util import load_html
 from onemsdk.schema.v1 import Response
+
+set_static_dir(os.path.join(os.path.dirname(__file__), 'static'))
 
 
 class TestModel(TestCase):

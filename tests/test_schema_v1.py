@@ -323,7 +323,7 @@ class TestModel(TestCase):
 
     def test_response_from_html_form(self):
         html = """
-            <form header="Form header" confirmation-needed="true" method="PATCH" action="/route">
+            <form header="Form header" confirmation-needed="false" method="PATCH" action="/route">
                 <section name="step1">
                    <ul>
                        <li value="first">First item</li>
@@ -376,7 +376,7 @@ class TestModel(TestCase):
                 "meta": {
                     "completion_status_show": None,
                     "completion_status_in_header": None,
-                    "confirmation_needed": True
+                    "confirmation_needed": False
                 }
             }
         }

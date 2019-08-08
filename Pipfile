@@ -5,6 +5,7 @@ verify_ssl = true
 
 [dev-packages]
 coverage = "*"
+twine = "*"
 
 [packages]
 pydantic = "==0.31"

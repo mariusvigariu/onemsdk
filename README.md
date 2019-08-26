@@ -10,6 +10,9 @@ by.
 $ pip install onemsdk
 ```
 
+## Version history
+See [HISTORY.md](HISTORY.md) file.
+
 ## Usage example
 
 In order to serve a selectable menu like the one below, the application has to respond to

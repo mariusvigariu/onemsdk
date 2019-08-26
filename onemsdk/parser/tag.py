@@ -277,6 +277,9 @@ class SectionTagAttrs(BaseModel):
     header: Optional[str]
     footer: Optional[str]
     name: Optional[str]
+    auto_select: bool = False
+    multi_select: bool = False
+    numbered: bool = False
 
 
 class SectionTag(Tag):
@@ -333,9 +336,17 @@ class SectionTag(Tag):
 
     @classmethod
     def get_attrs(cls, node: Node) -> SectionTagAttrs:
-        return SectionTagAttrs(header=node.attrs.get('header'),
-                               footer=node.attrs.get('footer'),
-                               name=node.attrs.get('name'))
+        return SectionTagAttrs(
+            header=node.attrs.get('header'),
+            footer=node.attrs.get('footer'),
+            name=node.attrs.get('name'),
+            # Note that boolean attributes in HTML are evaluated to True if they are
+            # present (their actual value does not matter). They are evaluated to False
+            # only when they are missing
+            auto_select='auto-select' in node.attrs,
+            multi_select='multi-select' in node.attrs,
+            numbered='numbered' in node.attrs,
+        )
 
 
 SectionTag.update_forward_refs()
@@ -347,9 +358,9 @@ class FormTagAttrs(BaseModel):
     action: str
     method: str = 'POST'
 
-    completion_status_show: Optional[bool]
-    completion_status_in_header: Optional[bool]
-    confirmation_needed: Optional[bool]
+    completion_status_show: bool = False
+    completion_status_in_header: bool = False
+    confirmation_needed: bool = False
 
 
 class FormTag(Tag):
@@ -374,18 +385,14 @@ class FormTag(Tag):
 
     @classmethod
     def get_attrs(cls, node: Node):
-        str_bool_map = {'true': True, 'false': False, None: None}
         return FormTagAttrs(
             header=node.attrs.get('header'),
             footer=node.attrs.get('footer'),
             action=node.attrs.get('action'),
             method=node.attrs.get('method') or 'POST',
-            completion_status_show=str_bool_map[
-                node.attrs.get('completion-status-show')],
-            completion_status_in_header=str_bool_map[
-                node.attrs.get('completion-status-in-header')],
-            confirmation_needed=str_bool_map[
-                node.attrs.get('confirmation-needed')]
+            completion_status_show='completion-status-show' in node.attrs,
+            completion_status_in_header='completion-status-in-header' in node.attrs,
+            confirmation_needed='confirmation-needed' in node.attrs,
         )
 
     def render(self):

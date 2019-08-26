@@ -66,6 +66,17 @@ class MenuItem(BaseModel):
         return MenuItem(description=description, method=method, path=path)
 
 
+class MenuMeta(BaseModel):
+    """
+    Configuration fields for `Menu`
+    """
+    auto_select: bool = Schema(
+        True,
+        description='If the `Menu` has only one option, it is automatically selected, '
+                    'without asking the user for selection'
+    )
+
+
 class Menu(BaseModel):
     """
     A top level component that permits displaying a navigable menu or a plain text.
@@ -79,8 +90,12 @@ class Menu(BaseModel):
     header: str = Schema(None, description='The header of the menu.')
     footer: str = Schema(None, description='The header of the menu.')
 
-    def __init__(self, body: List[MenuItem], header: str = None, footer: str = None):
-        super(Menu, self).__init__(type='menu', body=body, header=header, footer=footer)
+    meta: MenuMeta = Schema(None, description='Configuration fields for `Menu`')
+
+    def __init__(self, body: List[MenuItem], header: str = None, footer: str = None,
+                 meta: MenuMeta = None):
+        super(Menu, self).__init__(type='menu', body=body, header=header, footer=footer,
+                                   meta=meta)
 
     @classmethod
     def from_tag(cls, section_tag: SectionTag) -> Menu:
@@ -102,6 +117,9 @@ class Menu(BaseModel):
             body=list(filter(None, body)),
             header=header or section_tag.attrs.header,
             footer=footer or section_tag.attrs.footer,
+            meta=MenuMeta(
+                auto_select=section_tag.attrs.auto_select
+            )
         )
 
 
@@ -216,6 +234,25 @@ class FormItemMenuItem(BaseModel):
         return FormItemMenuItem(value=value, description=description)
 
 
+class FormItemMenuMeta(BaseModel):
+    """
+    Configuration fields for a `FormItemMenu`
+    """
+    auto_select: bool = Schema(
+        False,
+        description='If the `FormItemMenu` has only one option, it is automatically '
+                    'selected, without asking the user for selection'
+    )
+    multi_select: bool = Schema(
+        False,
+        description='It allows multiple options to be selected'
+    )
+    numbered: bool = Schema(
+        False,
+        description='display numbers instead of letter option markers'
+    )
+
+
 class FormItemMenu(BaseModel):
     """
     Item in a form's body used to ask the user to select an option from a list
@@ -237,10 +274,16 @@ class FormItemMenu(BaseModel):
     header: str = Schema(None, description='The form menu header')
     footer: str = Schema(None, description='The form menu footer')
 
+    meta: FormItemMenuMeta = Schema(
+        None,
+        description='Configuration fields for a `FormItemMenu`'
+    )
+
     def __init__(self, body: List[FormItemMenuItem], name: str, header: str = None,
-                 footer: str = None):
+                 footer: str = None, meta: FormItemMenuMeta = None):
         super(FormItemMenu, self).__init__(
-            type='form-menu', body=body, name=name, header=header, footer=footer
+            type='form-menu', body=body, name=name, header=header, footer=footer,
+            meta=meta
         )
 
     @classmethod
@@ -264,6 +307,11 @@ class FormItemMenu(BaseModel):
             name=section_tag.attrs.name,
             header=header or section_tag.attrs.header,
             footer=footer or section_tag.attrs.footer,
+            meta=FormItemMenuMeta(
+                auto_select=section_tag.attrs.auto_select,
+                multi_select=section_tag.attrs.multi_select,
+                numbered=section_tag.attrs.numbered
+            ),
         )
 
 
@@ -272,24 +320,25 @@ class FormMeta(BaseModel):
     Configuration fields for a Form
     """
     completion_status_show: bool = Schema(
-        None,
+        False,
         title='Show completion status',
         description='Whether to display the completions status'
     )
     completion_status_in_header: bool = Schema(
-        None,
+        False,
         title='Show completion status in header',
         description='Whether to display the completion status in header'
     )
     confirmation_needed: bool = Schema(
-        None,
+        False,
         title='Confirmation needed',
         description='Whether to add an additional item at the end of the form for confirmation'
     )
 
-    def __init__(self, completion_status_show: bool = None,
-                 completion_status_in_header: bool = None,
-                 confirmation_needed: bool = None):
+    def __init__(self,
+                 completion_status_show: bool = False,
+                 completion_status_in_header: bool = False,
+                 confirmation_needed: bool = False):
         super(FormMeta, self).__init__(
             completion_status_in_header=completion_status_in_header,
             completion_status_show=completion_status_show,

@@ -1,12 +1,13 @@
-<form action="/route" header="Form header" footer="Form footer">
+<form action="/route" header="Form header" footer="Form footer"
+      completion-status-in-header>
   <section name="step1">
     <header>SETUP NAME</header>
     <label>What is your name?</label>
-    <input type="text" />
+    <input type="text"/>
     <footer>Reply with text</footer>
   </section>
 
-  <section name="step2" header="ignored header" footer="Reply A-D">
+  <section name="step2" header="ignored header" footer="Reply A-D" auto-select>
     <header>SETUP CITY</header>
     <label>Choose your city:</label>
     <ul>

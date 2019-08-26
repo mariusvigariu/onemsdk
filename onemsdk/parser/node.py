@@ -7,7 +7,7 @@ from pydantic import BaseModel
 
 class Node(BaseModel):
     tag: str
-    attrs: Dict[str, str] = {}
+    attrs: Dict[str, Union[str, None]] = {}
     children: List[Union[Node, str]] = []
 
     def add_child(self, child: Union[Node, str]):

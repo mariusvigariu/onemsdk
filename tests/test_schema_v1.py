@@ -53,7 +53,13 @@ class TestModel(TestCase):
                         ],
                         'name': 'second-step',
                         'header': 'Header section 2',
-                        'footer': 'Footer section 2'
+                        'footer': 'Footer section 2',
+                        'meta': {
+                            'auto_select': False,
+                            'multi_select': False,
+                            'numbered': False,
+                        }
+
                     },
                     {
                         'type': 'form-menu',
@@ -91,7 +97,12 @@ class TestModel(TestCase):
                         ],
                         'name': 'third-step',
                         'header': 'Header section 3',
-                        'footer': None
+                        'footer': None,
+                        'meta': {
+                            'auto_select': False,
+                            'multi_select': False,
+                            'numbered': False,
+                        }
                     }
                 ],
                 'method': 'POST',
@@ -99,16 +110,16 @@ class TestModel(TestCase):
                 'header': 'Parent header',
                 'footer': None,
                 'meta': {
-                    'completion_status_show': None,
-                    'completion_status_in_header': None,
-                    'confirmation_needed': None
+                    'completion_status_show': False,
+                    'completion_status_in_header': False,
+                    'confirmation_needed': False
                 },
             }}
         self.assertEqual(json.dumps(expected), response.json())
 
     def test_response(self):
         html = """
-        <section>
+        <section auto-select="true cause it's present">
           <header>my menu</header>
           <ul>
             <li>
@@ -151,7 +162,10 @@ class TestModel(TestCase):
                     }
                 ],
                 "header": "my menu",
-                "footer": "my footer"
+                "footer": "my footer",
+                "meta": {
+                    "auto_select": True
+                }
             }
         }
         self.assertEqual(json.dumps(expected), response.json())
@@ -173,29 +187,37 @@ class TestModel(TestCase):
             "content_type": "menu",
             "content": {
                 "type": "menu",
-                "body": [{
-                    "type": "option",
-                    "description": "Route 1",
-                    "method": "POST",
-                    "path": "/route1"
-                }, {
-                    "type": "option",
-                    "description": "Route 2",
-                    "method": 'GET',
-                    "path": "/route2"
-                }, {
-                    "type": "content",
-                    "description": "Separator",
-                    "method": None,
-                    "path": None
-                }, {
-                    "type": "option",
-                    "description": "Route 3",
-                    "method": 'GET',
-                    "path": "/route3"
-                }],
+                "body": [
+                    {
+                        "type": "option",
+                        "description": "Route 1",
+                        "method": "POST",
+                        "path": "/route1"
+                    },
+                    {
+                        "type": "option",
+                        "description": "Route 2",
+                        "method": 'GET',
+                        "path": "/route2"
+                    },
+                    {
+                        "type": "content",
+                        "description": "Separator",
+                        "method": None,
+                        "path": None
+                    },
+                    {
+                        "type": "option",
+                        "description": "Route 3",
+                        "method": 'GET',
+                        "path": "/route3"
+                    }
+                ],
                 "header": "Some header",
-                "footer": "Some footer"
+                "footer": "Some footer",
+                "meta": {
+                    "auto_select": False
+                }
             }
         }
 
@@ -215,7 +237,10 @@ class TestModel(TestCase):
                 "type": "menu",
                 "body": [],
                 "header": "header attr",
-                "footer": "footer attr"
+                "footer": "footer attr",
+                "meta": {
+                    "auto_select": False
+                }
             }
         }
         self.assertEqual(json.dumps(expected), response.json())
@@ -234,7 +259,10 @@ class TestModel(TestCase):
                 "type": "menu",
                 "body": [],
                 "header": "header child",
-                "footer": "footer child"
+                "footer": "footer child",
+                "meta": {
+                    "auto_select": False
+                }
             }
         }
         self.assertEqual(json.dumps(expected), response.json())
@@ -253,7 +281,10 @@ class TestModel(TestCase):
                 "type": "menu",
                 "body": [],
                 "header": "header child",
-                "footer": "footer attr"
+                "footer": "footer attr",
+                "meta": {
+                    "auto_select": False,
+                }
             }
         }
         self.assertEqual(json.dumps(expected), response.json())
@@ -273,49 +304,63 @@ class TestModel(TestCase):
                         "description": "What is your name?",
                         "header": "SETUP NAME",
                         "footer": "Reply with text"
-                    }, {
+                    },
+                    {
                         "type": "form-menu",
-                        "body": [{
-                            "type": "content",
-                            "description": "Choose your city:",
-                            "value": None
-                        }, {
-                            "type": "content",
-                            "description": "UK",
-                            "value": None
-                        }, {
-                            "type": "option",
-                            "description": "London",
-                            "value": "london"
-                        }, {
-                            "type": "option",
-                            "description": "Manchester",
-                            "value": "manchester"
-                        }, {
-                            "type": "content",
-                            "description": "FR",
-                            "value": None
-                        }, {
-                            "type": "option",
-                            "description": "Paris",
-                            "value": "paris"
-                        }, {
-                            "type": "option",
-                            "description": "Nice",
-                            "value": "nice"
-                        }],
+                        "body": [
+                            {
+                                "type": "content",
+                                "description": "Choose your city:",
+                                "value": None
+                            },
+                            {
+                                "type": "content",
+                                "description": "UK",
+                                "value": None
+                            },
+                            {
+                                "type": "option",
+                                "description": "London",
+                                "value": "london"
+                            },
+                            {
+                                "type": "option",
+                                "description": "Manchester",
+                                "value": "manchester"
+                            },
+                            {
+                                "type": "content",
+                                "description": "FR",
+                                "value": None
+                            },
+                            {
+                                "type": "option",
+                                "description": "Paris",
+                                "value": "paris"
+                            },
+                            {
+                                "type": "option",
+                                "description": "Nice",
+                                "value": "nice"
+                            }
+                        ],
                         "name": "step2",
                         "header": "SETUP CITY",
                         "footer": "Reply A-D",
+                        "meta": {
+                            "auto_select": True,
+                            "multi_select": False,
+                            "numbered": False
+                        }
                     }],
                 "method": "POST",
                 "path": "/route",
                 "header": "Form header",
                 "footer": "Form footer",
                 "meta": {
-                    "completion_status_show": None,
-                    "completion_status_in_header": None,
-                    "confirmation_needed": None
+                    "completion_status_show": False,
+                    "completion_status_in_header": True,
+                    "confirmation_needed": False
                 }
             }
         }
@@ -323,8 +368,8 @@ class TestModel(TestCase):
 
     def test_response_from_html_form(self):
         html = """
-            <form header="Form header" confirmation-needed="false" method="PATCH" action="/route">
-                <section name="step1">
+            <form header="Form header" confirmation-needed method="PATCH" action="/route">
+                <section name="step1" numbered>
                    <ul>
                        <li value="first">First item</li>
                        <li value="second">Second item</li>
@@ -360,6 +405,11 @@ class TestModel(TestCase):
                         "name": "step1",
                         "header": None,
                         "footer": None,
+                        "meta": {
+                            "auto_select": False,
+                            "multi_select": False,
+                            "numbered": True
+                        }
                     },
                     {
                         "type": "date",
@@ -374,11 +424,10 @@ class TestModel(TestCase):
                 "header": "Form header",
                 "footer": None,
                 "meta": {
-                    "completion_status_show": None,
-                    "completion_status_in_header": None,
-                    "confirmation_needed": False
+                    "completion_status_show": False,
+                    "completion_status_in_header": False,
+                    "confirmation_needed": True
                 }
             }
         }
-
         self.assertEqual(json.dumps(expected), response.json())

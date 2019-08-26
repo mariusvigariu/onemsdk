@@ -37,6 +37,17 @@ components:
       required:
       - type
       - description
+    MenuMeta:
+      title: MenuMeta
+      description: Configuration fields for `Menu`
+      type: object
+      properties:
+        auto_select:
+          title: Auto_Select
+          description: If the `Menu` has only one option, it is automatically selected,
+            without asking the user for selection
+          default: true
+          type: boolean
     Menu:
       title: Menu
       description: A top level component that permits displaying a navigable menu
@@ -62,6 +73,11 @@ components:
           title: Footer
           description: The header of the menu.
           type: string
+        meta:
+          title: Meta
+          description: Configuration fields for `Menu`
+          allOf:
+          - $ref: '#/components/schemas/MenuMeta'
       required:
       - body
     FormItemContent:
@@ -122,6 +138,27 @@ components:
       required:
       - type
       - description
+    FormItemMenuMeta:
+      title: FormItemMenuMeta
+      description: Configuration fields for a `FormItemMenu`
+      type: object
+      properties:
+        auto_select:
+          title: Auto_Select
+          description: If the `FormItemMenu` has only one option, it is automatically
+            selected, without asking the user for selection
+          default: false
+          type: boolean
+        multi_select:
+          title: Multi_Select
+          description: It allows multiple options to be selected
+          default: false
+          type: boolean
+        numbered:
+          title: Numbered
+          description: display numbers instead of letter option markers
+          default: false
+          type: boolean
     FormItemMenu:
       title: FormItemMenu
       description: Item in a form's body used to ask the user to select an option
@@ -152,6 +189,11 @@ components:
           title: Footer
           description: The form menu footer
           type: string
+        meta:
+          title: Meta
+          description: Configuration fields for a `FormItemMenu`
+          allOf:
+          - $ref: '#/components/schemas/FormItemMenuMeta'
       required:
       - body
       - name
@@ -163,15 +205,18 @@ components:
         completion_status_show:
           title: Show completion status
           description: Whether to display the completions status
+          default: false
           type: boolean
         completion_status_in_header:
           title: Show completion status in header
           description: Whether to display the completion status in header
+          default: false
           type: boolean
         confirmation_needed:
           title: Confirmation needed
           description: Whether to add an additional item at the end of the form for
             confirmation
+          default: false
           type: boolean
     Form:
       title: Form

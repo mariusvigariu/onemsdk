@@ -16,6 +16,17 @@ class MenuItemType(str, Enum):
     content = 'content'
 
 
+class HttpMethod(str, Enum):
+    GET = 'GET'
+    POST = 'POST'
+    PUT = 'PUT'
+    PATCH = 'PATCH'
+    DELETE = 'DELETE'
+    HEAD = 'HEAD'
+    OPTIONS = 'OPTIONS'
+    TRACE = 'TRACE'
+
+
 class MenuItem(BaseModel):
     """
     An item in a menu. Depending on its type, a menu item can be either an option (type=option) or an option separator (type=content)
@@ -28,7 +39,7 @@ class MenuItem(BaseModel):
         ...,
         description='The displayed text of a menu item.'
     )
-    method: str = Schema(
+    method: HttpMethod = Schema(
         None,
         description='The HTTP method called when the menu item is selected.'
     )
@@ -37,11 +48,15 @@ class MenuItem(BaseModel):
         description='The path called when the menu item is selected.'
     )
 
-    def __init__(self, description: str, method: str = None, path: str = None):
+    def __init__(self, description: str, method: HttpMethod = None, path: str = None):
         if path:
             type = MenuItemType.option
         else:
             type = MenuItemType.content
+
+        if method is None:
+            method = HttpMethod.GET
+
         super(MenuItem, self).__init__(type=type, description=description, method=method,
                                        path=path)
 
@@ -356,7 +371,8 @@ class Form(BaseModel):
         ...,
         description='Sequence of components used to acquire the pieces of data needed from user'
     )
-    method: str = Schema('POST', description='The HTTP method used to send the form data')
+    method: HttpMethod = Schema(
+        None, description='The HTTP method used to send the form data')
     path: str = Schema(..., description='The path used to send the form data')
     header: str = Schema(
         None,
@@ -369,8 +385,12 @@ class Form(BaseModel):
     meta: FormMeta = Schema(None, description='Contains configuration flags')
 
     def __init__(self, body: List[Union[FormItemContent, FormItemMenu]], path: str,
-                 meta: FormMeta, method: str = 'POST', header: str = None,
-                 footer: str = None, ):
+                 meta: FormMeta = None, method: HttpMethod = None,
+                 header: str = None, footer: str = None, ):
+
+        if method is None:
+            method = HttpMethod.POST
+
         super(Form, self).__init__(type='form', body=body, method=method, path=path,
                                    header=header, footer=footer, meta=meta)
 

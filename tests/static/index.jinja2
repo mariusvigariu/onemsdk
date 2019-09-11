@@ -10,8 +10,8 @@
     <header>Header section 2</header>
     <ul>
       <li>Separator 1 section 2</li>
-      <li data="{{ li['2']['data'] }}"><a href="/route-1">Option 1 section 2</a></li>
-      <li data="opt-22"><a href="/route-2">Option 2 section 2</a></li>
+      <li value="{{ li['2']['value'] }}"><a href="/route-1">Option 1 section 2</a></li>
+      <li value="opt-22"><a href="/route-2">Option 2 section 2</a></li>
       <li>Separator 2 section 2</li>
     </ul>
     <footer>Footer section 2</footer>
@@ -21,7 +21,7 @@
     <header>Header section 3</header>
     <p>Paragraph 1 section 3</p>
     <ul>{% for item in items %}
-      <li data="{{ item['data'] }}"><a href="{{ item['href'] }}">{{ item['desc'] }}</a></li>{% endfor %}
+      <li value="{{ item['value'] }}" text-search="{{ item['text_search'] }}"><a href="{{ item['href'] }}">{{ item['desc'] }}</a></li>{% endfor %}
       <li>Separator 1 section 3</li>
     </ul>
     <p>Paragraph 2 section 3</p>

@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  version: m5.1
+  version: m5.2
   title: ONEm JSON response schema
   description: ''
 paths: {}
@@ -108,6 +108,10 @@ components:
         value:
           title: Value
           description: The value of this MenuItemFormItem, used in form serialization
+          type: string
+        text_search:
+          title: Text_Search
+          description: Field to add more context for searching in options
           type: string
       required:
       - type

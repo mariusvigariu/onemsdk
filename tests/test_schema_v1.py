@@ -62,22 +62,26 @@ class TestModel(TestCase):
                             {
                                 "type": "content",
                                 "description": "Separator 1 section 2",
-                                "value": None
+                                "value": None,
+                                "text_search": None,
                             },
                             {
-                                "type": "content",
+                                "type": "option",
                                 "description": "Option 1 section 2",
-                                "value": None
+                                "value": "opt-21",
+                                "text_search": None,
                             },
                             {
-                                "type": "content",
+                                "type": "option",
                                 "description": "Option 2 section 2",
-                                "value": None
+                                "value": "opt-22",
+                                "text_search": None,
                             },
                             {
                                 "type": "content",
                                 "description": "Separator 2 section 2",
-                                "value": None
+                                "value": None,
+                                "text_search": None,
                             }
                         ],
                         "value": None,
@@ -113,24 +117,28 @@ class TestModel(TestCase):
                         "footer": None,
                         "body": [
                             {
-                                "type": "content",
+                                "type": "option",
                                 "description": "Option 1 section 3",
-                                "value": None
+                                "value": "opt-31",
+                                "text_search": "Context for option 1 section 3",
                             },
                             {
-                                "type": "content",
+                                "type": "option",
                                 "description": "Option 2 section 3",
-                                "value": None
+                                "value": "opt-32",
+                                "text_search": "Context for option 2 section 3",
                             },
                             {
-                                "type": "content",
+                                "type": "option",
                                 "description": "Option 3 section 3",
-                                "value": None
+                                "value": "opt-33",
+                                "text_search": "Context for option 3 section 3",
                             },
                             {
                                 "type": "content",
                                 "description": "Separator 1 section 3",
-                                "value": None
+                                "value": None,
+                                "text_search": None,
                             }
                         ],
                         "value": None,
@@ -395,32 +403,38 @@ class TestModel(TestCase):
                             {
                                 "type": "content",
                                 "description": "UK",
-                                "value": None
+                                "value": None,
+                                "text_search": None,
                             },
                             {
                                 "type": "option",
                                 "description": "London",
-                                "value": "london"
+                                "value": "london",
+                                "text_search": None,
                             },
                             {
                                 "type": "option",
                                 "description": "Manchester",
-                                "value": "manchester"
+                                "value": "manchester",
+                                "text_search": None,
                             },
                             {
                                 "type": "content",
                                 "description": "FR",
-                                "value": None
+                                "value": None,
+                                "text_search": None,
                             },
                             {
                                 "type": "option",
                                 "description": "Paris",
-                                "value": "paris"
+                                "value": "paris",
+                                "text_search": None,
                             },
                             {
                                 "type": "option",
                                 "description": "Nice",
-                                "value": "nice"
+                                "value": "nice",
+                                "text_search": None,
                             }
                         ],
                         "value": None,
@@ -467,7 +481,7 @@ class TestModel(TestCase):
             <form header="Form header" confirmation-needed method="PATCH" action="/route">
                 <section name="step1" numbered required auto-select>
                    <ul>
-                       <li value="first">First item</li>
+                       <li value="first" text-search="Context for first item">First item</li>
                        <li value="second">Second item</li>
                    </ul>
                 </section>
@@ -494,12 +508,14 @@ class TestModel(TestCase):
                             {
                                 "type": "option",
                                 "description": "First item",
-                                "value": "first"
+                                "value": "first",
+                                "text_search": "Context for first item",
                             },
                             {
                                 "type": "option",
                                 "description": "Second item",
-                                "value": "second"
+                                "value": "second",
+                                "text_search": None,
                             }
                         ],
                         "value": None,

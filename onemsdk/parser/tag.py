@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import inspect
 import sys
 from abc import ABC, abstractmethod
@@ -21,14 +19,14 @@ class Tag(BaseModel, ABC):
         tag_name: str = None
 
     attrs: Any = None
-    children: List[Union[Tag, str]] = []
+    children: List[Union['Tag', str]] = []
 
     @abstractmethod
     def render(self) -> str:
         pass
 
     @classmethod
-    def from_node(cls, node: Node) -> Tag:
+    def from_node(cls, node: Node) -> 'Tag':
         if node.tag != cls.Config.tag_name:
             raise NodeTagMismatchException(
                 f'Expected tag <{cls.Config.tag_name}>, received <{node.tag}>')
@@ -98,10 +96,22 @@ class InputTagType(str, Enum):
     text = 'text'
     date = 'date'
     datetime = 'datetime'
+    number = 'number'
+    hidden = 'hidden'
 
 
 class InputTagAttrs(BaseModel):
     type: InputTagType
+    min: Union[int, float] = None
+    min_error: str = None  # Does not exist in HTML5
+    minlength: int = None  # Does not exist in HTML5, but it's needed
+    minlength_error: str = None  # Does not exist in HTML5
+    max: Union[int, float] = None
+    max_error: str = None  # Does not exist in HTML5
+    maxlength: int = None
+    maxlength_error: str = None  # Does not exist in HTML5
+    step: int = None  # type="number" with step="1" will be translated as integer
+    value: str = None  # only for type="hidden"
 
 
 class InputTag(Tag):
@@ -115,7 +125,19 @@ class InputTag(Tag):
 
     @classmethod
     def get_attrs(cls, node: Node):
-        return InputTagAttrs(type=node.attrs.get('type'))
+        return InputTagAttrs(
+            type=InputTagType(node.attrs.get('type')),
+            min=node.attrs.get('min'),
+            min_error=node.attrs.get('min-error'),
+            minlength=node.attrs.get('minlength'),
+            minlength_error=node.attrs.get('minlength-error'),
+            max=node.attrs.get('max'),
+            max_error=node.attrs.get('max-error'),
+            maxlength=node.attrs.get('maxlength'),
+            maxlength_error=node.attrs.get('maxlength-error'),
+            step=node.attrs.get('step'),
+            value=node.attrs.get('value')
+        )
 
     def render(self):
         return ''
@@ -280,6 +302,16 @@ class SectionTagAttrs(BaseModel):
     auto_select: bool = False
     multi_select: bool = False
     numbered: bool = False
+    chunking_footer: Optional[str]
+    confirmation_label: Optional[str]
+    method: Optional[str]
+    required: Optional[bool]
+    status_exclude: Optional[bool]
+    status_prepend: Optional[bool]
+    url: Optional[str]
+    validate_type_error: Optional[str]
+    validate_type_error_footer: Optional[str]
+    validate_url: Optional[str]
 
 
 class SectionTag(Tag):
@@ -346,6 +378,16 @@ class SectionTag(Tag):
             auto_select='auto-select' in node.attrs,
             multi_select='multi-select' in node.attrs,
             numbered='numbered' in node.attrs,
+            chunking_footer=node.attrs.get('chunking-footer'),
+            confirmation_label=node.attrs.get('confirmation-label'),
+            method=node.attrs.get('method'),
+            required='required' in node.attrs,
+            status_exclude='status-exclude' in node.attrs,
+            status_prepend='status-prepend' in node.attrs,
+            url=node.attrs.get('url'),
+            validate_type_error=node.attrs.get('validate-type-error'),
+            validate_type_error_footer=node.attrs.get('validate-type-error-footer'),
+            validate_url=node.attrs.get('validate-url'),
         )
 
 

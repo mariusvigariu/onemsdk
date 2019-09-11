@@ -354,9 +354,9 @@ class TestModel(TestCase):
                 "type": "form",
                 "body": [
                     {
-                        "type": "string",
+                        "type": "float",
                         "name": "step1",
-                        "description": "What is your name?",
+                        "description": "What is your height?",
                         "header": "SETUP NAME",
                         "footer": "Reply with text",
                         "body": None,
@@ -367,10 +367,10 @@ class TestModel(TestCase):
                         "min_length_error": None,
                         "max_length": None,
                         "max_length_error": None,
-                        "min_value": None,
-                        "min_value_error": None,
-                        "max_value": None,
-                        "max_value_error": None,
+                        "min_value": 0.5,
+                        "min_value_error": "Are you a baby?",
+                        "max_value": 2.5,
+                        "max_value_error": "Too high",
                         "meta": {
                             "auto_select": False,
                             "multi_select": False,

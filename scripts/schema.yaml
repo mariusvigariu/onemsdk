@@ -203,7 +203,7 @@ components:
         min_value:
           title: Min_Value
           description: Validates the user input - for type=int|float
-          type: integer
+          type: number
         min_value_error:
           title: Min_Value_Error
           description: Message to be shown on min_value error
@@ -211,7 +211,7 @@ components:
         max_value:
           title: Max_Value
           description: Validates the user input - for type=int|float
-          type: integer
+          type: number
         max_value_error:
           title: Max_Value_Error
           description: Message to be shown on max_value error

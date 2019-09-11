@@ -270,7 +270,7 @@ class FormItem(BaseModel):
         None,
         description='Message to be shown on max_length error'
     )
-    min_value: int = Schema(
+    min_value: float = Schema(
         None,
         description='Validates the user input - for type=int|float'
     )
@@ -278,7 +278,7 @@ class FormItem(BaseModel):
         None,
         description='Message to be shown on min_value error'
     )
-    max_value: int = Schema(
+    max_value: float = Schema(
         None,
         description='Validates the user input - for type=int|float'
     )

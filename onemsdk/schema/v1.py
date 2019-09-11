@@ -385,8 +385,8 @@ class Form(BaseModel):
     meta: FormMeta = Schema(None, description='Contains configuration flags')
 
     def __init__(self, body: List[Union[FormItemContent, FormItemMenu]], path: str,
-                 meta: FormMeta, method: HttpMethod = None, header: str = None,
-                 footer: str = None, ):
+                 meta: FormMeta = None, method: HttpMethod = None,
+                 header: str = None, footer: str = None, ):
 
         if method is None:
             method = HttpMethod.POST

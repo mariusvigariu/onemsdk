@@ -202,6 +202,7 @@ ATag.update_forward_refs()
 
 class LiTagAttrs(BaseModel):
     value: Optional[str]
+    text_search: Optional[str]
 
 
 class LiTag(Tag):
@@ -221,7 +222,10 @@ class LiTag(Tag):
 
     @classmethod
     def get_attrs(cls, node: Node):
-        return LiTagAttrs(value=node.attrs.get('value'))
+        return LiTagAttrs(
+            value=node.attrs.get('value'),
+            text_search=node.attrs.get('text-search'),
+        )
 
     def render(self):
         if isinstance(self.children[0], ATag):

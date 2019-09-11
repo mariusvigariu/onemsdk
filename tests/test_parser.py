@@ -1,8 +1,8 @@
 import os
 from unittest import TestCase
 
-from onemsdk.parser.util import build_node, _load_template
 from onemsdk import set_static_dir
+from onemsdk.parser.util import build_node, _load_template
 
 set_static_dir(os.path.join(os.path.dirname(__file__), 'static'))
 
@@ -87,15 +87,30 @@ class TestParser(TestCase):
     def test_load_template(self):
         data = {
             'li': {
-                '2': {'data': 'opt-21'},
+                '2': {'value': 'opt-21'},
             },
             'section': {
                 '3': {'name': 'third-step'}
             },
             'items': [
-                {'data': 'opt-31', 'href': 'route-1', 'desc': 'Option 1 section 3'},
-                {'data': 'opt-32', 'href': 'route-2', 'desc': 'Option 2 section 3'},
-                {'data': 'opt-33', 'href': 'route-3', 'desc': 'Option 3 section 3'},
+                {
+                    'value': 'opt-31',
+                    'href': 'route-1',
+                    'desc': 'Option 1 section 3',
+                    'text_search': 'Context for option 1 section 3'
+                },
+                {
+                    'value': 'opt-32',
+                    'href': 'route-2',
+                    'desc': 'Option 2 section 3',
+                    'text_search': 'Context for option 2 section 3'
+                },
+                {
+                    'value': 'opt-33',
+                    'href': 'route-3',
+                    'desc': 'Option 3 section 3',
+                    'text_search': 'Context for option 3 section 3'
+                },
             ]
         }
         rendered_html = _load_template('index.jinja2', **data)

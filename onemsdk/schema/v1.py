@@ -169,20 +169,25 @@ class MenuItemFormItem(BaseModel):
         None,
         description='The value of this MenuItemFormItem, used in form serialization'
     )
+    text_search: str = Schema(
+        None,
+        description='Field to add more context for searching in options'
+    )
 
-    def __init__(self, description: str, value: str = None):
+    def __init__(self, description: str, value: str = None, text_search: str = None):
         if value:
             type = MenuItemType.option
         else:
             type = MenuItemType.content
         super(MenuItemFormItem, self).__init__(
-            type=type, description=description, value=value
+            type=type, description=description, value=value, text_search=text_search
         )
 
     @classmethod
     def from_tag(cls, tag: Union[LiTag, PTag, BrTag, str]
                  ) -> Union['MenuItemFormItem', None]:
         value = None
+        text_search = None
 
         if isinstance(tag, str):
             description = tag
@@ -192,10 +197,12 @@ class MenuItemFormItem(BaseModel):
         if not description:
             return None
 
-        if isinstance(tag, LiTag) and tag.attrs.value:
+        if isinstance(tag, LiTag):
             value = tag.attrs.value
+            text_search = tag.attrs.text_search
 
-        return MenuItemFormItem(value=value, description=description)
+        return MenuItemFormItem(value=value, description=description,
+                                text_search=text_search)
 
 
 MenuItemFormItem.update_forward_refs()

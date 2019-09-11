@@ -290,7 +290,7 @@ class FormItem(BaseModel):
         None,
         description='Applies only for type=form-menu'
     )
-    method: str = Schema(
+    method: HttpMethod = Schema(
         None,
         description='http method, how the callback url should be triggered'
     )

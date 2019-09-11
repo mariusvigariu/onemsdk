@@ -51,10 +51,6 @@ class MenuItem(BaseModel):
             type = MenuItemType.option
         else:
             type = MenuItemType.content
-
-        if method is None:
-            method = HttpMethod.GET
-
         super(MenuItem, self).__init__(type=type, description=description, method=method,
                                        path=path)
 

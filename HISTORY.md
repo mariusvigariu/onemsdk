@@ -9,12 +9,17 @@
   `status_prepend`, `url`, `validate_type_error`, `validate_type_error_footer`,
   `validate_url`
   - Added new input types: `number`, `hidden`
+  - Added `text-search` attribute on `<li>`
 
 - Python API
   - Removed `FormItemMenu` and `FormItemContent`. Use a single model instead -
   `FormItem` which achieves the functionality of both old models
   - A bunch of new properties were added on `FormItem`, taken from `<input>`
   and `<section>` tags (see changes in HTML API above).
+  - Added `text_search` property on `MenuItemFormItem`
+
+- Fixes:
+  - Fix some bad tests
 ---
 ## 0.5.0
 - HTML API:

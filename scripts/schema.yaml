@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  version: m1
+  version: m5.0
   title: ONEm JSON response schema
   description: ''
 paths: {}
@@ -80,42 +80,8 @@ components:
           - $ref: '#/components/schemas/MenuMeta'
       required:
       - body
-    FormItemContent:
-      title: FormItemContent
-      description: Component used to ask a user for a certain type of free input
-      type: object
-      properties:
-        type:
-          title: Type
-          description: The type of data expected from the user
-          enum:
-          - string
-          - date
-          - datetime
-          type: string
-        name:
-          title: Name
-          description: An identifier to be linked with the data value obtained from
-            user. It has to be unique per form.
-          type: string
-        description:
-          title: Description
-          description: The displayed text.
-          type: string
-        header:
-          title: Header
-          description: The header of the form item
-          type: string
-        footer:
-          title: Footer
-          description: The footer of the form item
-          type: string
-      required:
-      - type
-      - name
-      - description
-    FormItemMenuItem:
-      title: FormItemMenuItem
+    MenuItemFormItem:
+      title: MenuItemFormItem
       description: An item in a form's menu
       type: object
       properties:
@@ -128,25 +94,24 @@ components:
           type: string
         description:
           title: Description
-          description: The displayed text.
+          description: The description of this MenuItemFormItem
           type: string
         value:
           title: Value
-          description: If type=option, value is used to identify the option chosen
-            by the user
+          description: The value of this MenuItemFormItem, used in form serialization
           type: string
       required:
       - type
       - description
-    FormItemMenuMeta:
-      title: FormItemMenuMeta
+    MenuFormItemMeta:
+      title: MenuFormItemMeta
       description: Configuration fields for a `FormItemMenu`
       type: object
       properties:
         auto_select:
           title: Auto_Select
-          description: If the `FormItemMenu` has only one option, it is automatically
-            selected, without asking the user for selection
+          description: Will be automatically selected if set to true and in case of
+            a single option in the menu
           default: false
           type: boolean
         multi_select:
@@ -156,47 +121,138 @@ components:
           type: boolean
         numbered:
           title: Numbered
-          description: display numbers instead of letter option markers
+          description: Display numbers instead of letter option markers
           default: false
           type: boolean
-    FormItemMenu:
-      title: FormItemMenu
-      description: Item in a form's body used to ask the user to select an option
-        from a list
+    FormItem:
+      title: FormItem
+      description: Component used to ask a user for a certain type of free input
       type: object
       properties:
         type:
           title: Type
-          description: The type of a FormItemMenu is always form-menu
-          const: form-menu
+          description: The type of data expected from the user
+          enum:
+          - string
+          - date
+          - datetime
+          - hidden
+          - int
+          - float
+          - form-menu
           type: string
-        body:
-          title: Body
-          description: A sequence of menu items containing options and/or option separators
-          type: array
-          items:
-            $ref: '#/components/schemas/FormItemMenuItem'
         name:
           title: Name
-          description: An identifier to be linked with the data value obtained from
-            user. It has to be unique per form.
+          description: The name of this FormItem, used in form serialization
+          type: string
+        description:
+          title: Description
+          description: The description of this FormItem
           type: string
         header:
           title: Header
-          description: The form menu header
+          description: If provided will overwrite the Form.header
           type: string
         footer:
           title: Footer
-          description: The form menu footer
+          description: If provided will overwrite the Form.footer
+          type: string
+        body:
+          title: Body
+          description: Required only for type=form-menu
+          type: array
+          items:
+            $ref: '#/components/schemas/MenuItemFormItem'
+        value:
+          title: Value
+          description: Required for type=hidden
+          type: string
+        chunking_footer:
+          title: Chunking_Footer
+          description: Shown in the footer of the sms chunks
+          type: string
+        confirmation_label:
+          title: Confirmation_Label
+          description: Shown in the confirmation menu
+          type: string
+        min_length:
+          title: Min_Length
+          description: Validates the user input - for type=string
+          type: integer
+        min_length_error:
+          title: Min_Length_Error
+          description: Message to be shown on min_length error
+          type: string
+        max_length:
+          title: Max_Length
+          description: Validates the user input - for type=string
+          type: integer
+        max_length_error:
+          title: Max_Length_Error
+          description: Message to be shown on max_length error
+          type: string
+        min_value:
+          title: Min_Value
+          description: Validates the user input - for type=int|float
+          type: integer
+        min_value_error:
+          title: Min_Value_Error
+          description: Message to be shown on min_value error
+          type: string
+        max_value:
+          title: Max_Value
+          description: Validates the user input - for type=int|float
+          type: integer
+        max_value_error:
+          title: Max_Value_Error
+          description: Message to be shown on max_value error
           type: string
         meta:
           title: Meta
-          description: Configuration fields for a `FormItemMenu`
+          description: Applies only for type=form-menu
           allOf:
-          - $ref: '#/components/schemas/FormItemMenuMeta'
+          - $ref: '#/components/schemas/MenuFormItemMeta'
+        method:
+          title: Method
+          description: http method, how the callback url should be triggered
+          type: string
+        required:
+          title: Required
+          description: Can be skipped if set to false
+          type: boolean
+        status_exclude:
+          title: Status_Exclude
+          description: If true this step will be excluded from the form completion
+            status
+          type: boolean
+        status_prepend:
+          title: Status_Prepend
+          description: If true this step will be prepended to the body pre of the
+            response - appended otherwise
+          type: boolean
+        url:
+          title: Url
+          description: Callback url triggered right after the choice has been set
+            for this form item
+          type: string
+        validate_type_error:
+          title: Validate_Type_Error
+          description: An error message to be shown on basic type validation
+          type: string
+        validate_type_error_footer:
+          title: Validate_Type_Error_Footer
+          description: Shown in the error message footer
+          type: string
+        validate_url:
+          title: Validate_Url
+          description: 'the callback url path (GET) triggered to validate user input
+            with query string ?name=user_input - url must return json content {"valid":
+            True/False, "error": "Some validation error message"}'
+          type: string
       required:
-      - body
+      - type
       - name
+      - description
     FormMeta:
       title: FormMeta
       description: Configuration fields for a Form
@@ -234,9 +290,7 @@ components:
             from user
           type: array
           items:
-            anyOf:
-            - $ref: '#/components/schemas/FormItemContent'
-            - $ref: '#/components/schemas/FormItemMenu'
+            $ref: '#/components/schemas/FormItem'
         method:
           title: Method
           description: The HTTP method used to send the form data

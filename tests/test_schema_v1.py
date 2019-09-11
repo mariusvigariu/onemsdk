@@ -16,110 +16,165 @@ class TestModel(TestCase):
         root_tag = load_html(html_file=filename)
         response = Response.from_tag(root_tag)
         expected = {
-            'content_type': 'form',
-            'content': {
-                'type': 'form',
-                'body': [
+            "content_type": "form",
+            "content": {
+                "type": "form",
+                "body": [
                     {
-                        'type': 'string',
-                        'name': 'first-step',
-                        'description': 'Paragraph 1 section 1',
-                        'header': 'Header section 1',
-                        'footer': 'Footer section 1'
+                        "type": "string",
+                        "name": "first-step",
+                        "description": "Paragraph 1 section 1",
+                        "header": "Header section 1",
+                        "footer": "Footer section 1",
+                        "body": None,
+                        "value": None,
+                        "chunking_footer": None,
+                        "confirmation_label": None,
+                        "min_length": None,
+                        "min_length_error": None,
+                        "max_length": None,
+                        "max_length_error": None,
+                        "min_value": None,
+                        "min_value_error": None,
+                        "max_value": None,
+                        "max_value_error": None,
+                        "meta": {
+                            "auto_select": False,
+                            "multi_select": False,
+                            "numbered": False
+                        },
+                        "method": None,
+                        "required": False,
+                        "status_exclude": False,
+                        "status_prepend": False,
+                        "url": None,
+                        "validate_type_error": None,
+                        "validate_type_error_footer": None,
+                        "validate_url": None
                     },
                     {
-                        'type': 'form-menu',
-                        'body': [
+                        "type": "form-menu",
+                        "name": "second-step",
+                        "description": "Separator 1 section 2\nOption 1 section 2\nOption 2 section 2\nSeparator 2 section 2",
+                        "header": "Header section 2",
+                        "footer": "Footer section 2",
+                        "body": [
                             {
-                                'type': 'content',
-                                'description': 'Separator 1 section 2',
-                                'value': None
+                                "type": "content",
+                                "description": "Separator 1 section 2",
+                                "value": None
                             },
                             {
-                                'type': 'content',
-                                'description': 'Option 1 section 2',
-                                'value': None
+                                "type": "content",
+                                "description": "Option 1 section 2",
+                                "value": None
                             },
                             {
-                                'type': 'content',
-                                'description': 'Option 2 section 2',
-                                'value': None
+                                "type": "content",
+                                "description": "Option 2 section 2",
+                                "value": None
                             },
                             {
-                                'type': 'content',
-                                'description': 'Separator 2 section 2',
-                                'value': None
+                                "type": "content",
+                                "description": "Separator 2 section 2",
+                                "value": None
                             }
                         ],
-                        'name': 'second-step',
-                        'header': 'Header section 2',
-                        'footer': 'Footer section 2',
-                        'meta': {
-                            'auto_select': False,
-                            'multi_select': False,
-                            'numbered': False,
-                        }
-
+                        "value": None,
+                        "chunking_footer": None,
+                        "confirmation_label": None,
+                        "min_length": None,
+                        "min_length_error": None,
+                        "max_length": None,
+                        "max_length_error": None,
+                        "min_value": None,
+                        "min_value_error": None,
+                        "max_value": None,
+                        "max_value_error": None,
+                        "meta": {
+                            "auto_select": False,
+                            "multi_select": False,
+                            "numbered": False
+                        },
+                        "method": None,
+                        "required": False,
+                        "status_exclude": False,
+                        "status_prepend": False,
+                        "url": None,
+                        "validate_type_error": None,
+                        "validate_type_error_footer": None,
+                        "validate_url": None
                     },
                     {
-                        'type': 'form-menu',
-                        'body': [
+                        "type": "form-menu",
+                        "name": "third-step",
+                        "description": "Paragraph 1 section 3\nOption 1 section 3\nOption 2 section 3\nOption 3 section 3\nSeparator 1 section 3\nParagraph 2 section 3",
+                        "header": "Header section 3",
+                        "footer": None,
+                        "body": [
                             {
-                                'type': 'content',
-                                'description': 'Paragraph 1 section 3',
-                                'value': None
+                                "type": "content",
+                                "description": "Option 1 section 3",
+                                "value": None
                             },
                             {
-                                'type': 'content',
-                                'description': 'Option 1 section 3',
-                                'value': None
+                                "type": "content",
+                                "description": "Option 2 section 3",
+                                "value": None
                             },
                             {
-                                'type': 'content',
-                                'description': 'Option 2 section 3',
-                                'value': None
+                                "type": "content",
+                                "description": "Option 3 section 3",
+                                "value": None
                             },
                             {
-                                'type': 'content',
-                                'description': 'Option 3 section 3',
-                                'value': None
-                            },
-                            {
-                                'type': 'content',
-                                'description': 'Separator 1 section 3',
-                                'value': None
-                            },
-                            {
-                                'type': 'content',
-                                'description': 'Paragraph 2 section 3',
-                                'value': None
+                                "type": "content",
+                                "description": "Separator 1 section 3",
+                                "value": None
                             }
                         ],
-                        'name': 'third-step',
-                        'header': 'Header section 3',
-                        'footer': None,
-                        'meta': {
-                            'auto_select': False,
-                            'multi_select': False,
-                            'numbered': False,
-                        }
+                        "value": None,
+                        "chunking_footer": None,
+                        "confirmation_label": None,
+                        "min_length": None,
+                        "min_length_error": None,
+                        "max_length": None,
+                        "max_length_error": None,
+                        "min_value": None,
+                        "min_value_error": None,
+                        "max_value": None,
+                        "max_value_error": None,
+                        "meta": {
+                            "auto_select": False,
+                            "multi_select": False,
+                            "numbered": False
+                        },
+                        "method": None,
+                        "required": False,
+                        "status_exclude": False,
+                        "status_prepend": False,
+                        "url": None,
+                        "validate_type_error": None,
+                        "validate_type_error_footer": None,
+                        "validate_url": None
                     }
                 ],
-                'method': 'POST',
-                'path': '/path-1',
-                'header': 'Parent header',
-                'footer': None,
-                'meta': {
-                    'completion_status_show': False,
-                    'completion_status_in_header': False,
-                    'confirmation_needed': False
-                },
-            }}
+                "method": "POST",
+                "path": "/path-1",
+                "header": "Parent header",
+                "footer": None,
+                "meta": {
+                    "completion_status_show": False,
+                    "completion_status_in_header": False,
+                    "confirmation_needed": False
+                }
+            }
+        }
         self.assertEqual(json.dumps(expected), response.json())
 
     def test_response(self):
         html = """
-        <section auto-select="true cause it's present">
+        <section auto-select="True cause it's present">
           <header>my menu</header>
           <ul>
             <li>
@@ -303,16 +358,40 @@ class TestModel(TestCase):
                         "name": "step1",
                         "description": "What is your name?",
                         "header": "SETUP NAME",
-                        "footer": "Reply with text"
+                        "footer": "Reply with text",
+                        "body": None,
+                        "value": None,
+                        "chunking_footer": None,
+                        "confirmation_label": None,
+                        "min_length": None,
+                        "min_length_error": None,
+                        "max_length": None,
+                        "max_length_error": None,
+                        "min_value": None,
+                        "min_value_error": None,
+                        "max_value": None,
+                        "max_value_error": None,
+                        "meta": {
+                            "auto_select": False,
+                            "multi_select": False,
+                            "numbered": False
+                        },
+                        "method": None,
+                        "required": False,
+                        "status_exclude": False,
+                        "status_prepend": False,
+                        "url": None,
+                        "validate_type_error": None,
+                        "validate_type_error_footer": None,
+                        "validate_url": None
                     },
                     {
                         "type": "form-menu",
+                        "name": "step2",
+                        "description": "Choose your city:\nUK\nLondon\nManchester\nFR\nParis\nNice",
+                        "header": "SETUP CITY",
+                        "footer": "Reply A-D",
                         "body": [
-                            {
-                                "type": "content",
-                                "description": "Choose your city:",
-                                "value": None
-                            },
                             {
                                 "type": "content",
                                 "description": "UK",
@@ -344,15 +423,32 @@ class TestModel(TestCase):
                                 "value": "nice"
                             }
                         ],
-                        "name": "step2",
-                        "header": "SETUP CITY",
-                        "footer": "Reply A-D",
+                        "value": None,
+                        "chunking_footer": None,
+                        "confirmation_label": None,
+                        "min_length": None,
+                        "min_length_error": None,
+                        "max_length": None,
+                        "max_length_error": None,
+                        "min_value": None,
+                        "min_value_error": None,
+                        "max_value": None,
+                        "max_value_error": None,
                         "meta": {
                             "auto_select": True,
                             "multi_select": False,
                             "numbered": False
-                        }
-                    }],
+                        },
+                        "method": None,
+                        "required": False,
+                        "status_exclude": False,
+                        "status_prepend": False,
+                        "url": None,
+                        "validate_type_error": None,
+                        "validate_type_error_footer": None,
+                        "validate_url": None
+                    }
+                ],
                 "method": "POST",
                 "path": "/route",
                 "header": "Form header",
@@ -369,15 +465,15 @@ class TestModel(TestCase):
     def test_response_from_html_form(self):
         html = """
             <form header="Form header" confirmation-needed method="PATCH" action="/route">
-                <section name="step1" numbered>
+                <section name="step1" numbered required auto-select>
                    <ul>
                        <li value="first">First item</li>
                        <li value="second">Second item</li>
                    </ul>
                 </section>
-                <section name="step2">
+                <section name="step2" method="POST" confirmation-label="confirmation label" required>
                    <label>A question</label>
-                   <input type="date"/>
+                   <input type="number" step="1" />
                 </section>
             </form>
         """
@@ -390,6 +486,10 @@ class TestModel(TestCase):
                 "body": [
                     {
                         "type": "form-menu",
+                        "name": "step1",
+                        "description": "First item\nSecond item",
+                        "header": None,
+                        "footer": None,
                         "body": [
                             {
                                 "type": "option",
@@ -402,21 +502,62 @@ class TestModel(TestCase):
                                 "value": "second"
                             }
                         ],
-                        "name": "step1",
-                        "header": None,
-                        "footer": None,
+                        "value": None,
+                        "chunking_footer": None,
+                        "confirmation_label": None,
+                        "min_length": None,
+                        "min_length_error": None,
+                        "max_length": None,
+                        "max_length_error": None,
+                        "min_value": None,
+                        "min_value_error": None,
+                        "max_value": None,
+                        "max_value_error": None,
                         "meta": {
-                            "auto_select": False,
+                            "auto_select": True,
                             "multi_select": False,
                             "numbered": True
-                        }
+                        },
+                        "method": None,
+                        "required": True,
+                        "status_exclude": False,
+                        "status_prepend": False,
+                        "url": None,
+                        "validate_type_error": None,
+                        "validate_type_error_footer": None,
+                        "validate_url": None
                     },
                     {
-                        "type": "date",
+                        "type": "int",
                         "name": "step2",
                         "description": "A question",
                         "header": None,
-                        "footer": None
+                        "footer": None,
+                        "body": None,
+                        "value": None,
+                        "chunking_footer": None,
+                        "confirmation_label": "confirmation label",
+                        "min_length": None,
+                        "min_length_error": None,
+                        "max_length": None,
+                        "max_length_error": None,
+                        "min_value": None,
+                        "min_value_error": None,
+                        "max_value": None,
+                        "max_value_error": None,
+                        "meta": {
+                            "auto_select": False,
+                            "multi_select": False,
+                            "numbered": False
+                        },
+                        "method": "POST",
+                        "required": True,
+                        "status_exclude": False,
+                        "status_prepend": False,
+                        "url": None,
+                        "validate_type_error": None,
+                        "validate_type_error_footer": None,
+                        "validate_url": None
                     }
                 ],
                 "method": "PATCH",

@@ -4,8 +4,9 @@ import os
 import oyaml as yaml
 from pydantic.schema import schema
 
-from onemsdk.schema.v1 import (MenuItem, Menu, FormItemContent, FormItemMenu,
-                               FormItemMenuItem, Form, Response)
+from onemsdk.schema.v1 import (
+    MenuItem, Menu, FormItem, MenuItemFormItem, Form, Response
+)
 
 begin = """
 openapi: 3.0.0
@@ -27,9 +28,8 @@ if __name__ == '__main__':
     top_level_schema = schema([
         MenuItem,
         Menu,
-        FormItemContent,
-        FormItemMenu,
-        FormItemMenuItem,
+        FormItem,
+        MenuItemFormItem,
         Form,
         Response,
     ], ref_prefix='#/components/schemas/')

@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  version: m5.0
+  version: m5.1
   title: ONEm JSON response schema
   description: ''
 paths: {}
@@ -29,6 +29,15 @@ components:
         method:
           title: Method
           description: The HTTP method called when the menu item is selected.
+          enum:
+          - GET
+          - POST
+          - PUT
+          - PATCH
+          - DELETE
+          - HEAD
+          - OPTIONS
+          - TRACE
           type: string
         path:
           title: Path
@@ -46,7 +55,7 @@ components:
           title: Auto_Select
           description: If the `Menu` has only one option, it is automatically selected,
             without asking the user for selection
-          default: true
+          default: false
           type: boolean
     Menu:
       title: Menu
@@ -215,20 +224,32 @@ components:
         method:
           title: Method
           description: http method, how the callback url should be triggered
+          enum:
+          - GET
+          - POST
+          - PUT
+          - PATCH
+          - DELETE
+          - HEAD
+          - OPTIONS
+          - TRACE
           type: string
         required:
           title: Required
           description: Can be skipped if set to false
+          default: false
           type: boolean
         status_exclude:
           title: Status_Exclude
           description: If true this step will be excluded from the form completion
             status
+          default: false
           type: boolean
         status_prepend:
           title: Status_Prepend
           description: If true this step will be prepended to the body pre of the
             response - appended otherwise
+          default: false
           type: boolean
         url:
           title: Url
@@ -295,6 +316,15 @@ components:
           title: Method
           description: The HTTP method used to send the form data
           default: POST
+          enum:
+          - GET
+          - POST
+          - PUT
+          - PATCH
+          - DELETE
+          - HEAD
+          - OPTIONS
+          - TRACE
           type: string
         path:
           title: Path

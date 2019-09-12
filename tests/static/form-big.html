@@ -1,13 +1,13 @@
 <form action="/route" header="Form header" footer="Form footer"
       completion-status-in-header>
-  <section name="step1">
-    <header>SETUP NAME</header>
+  <section name="step1" required>
+    <header>SETUP HEIGHT</header>
     <label>What is your height?</label>
     <input type="number" min="0.5" max="2.5" max-error="Too high" min-error="Are you a baby?"/>
     <footer>Reply with text</footer>
   </section>
 
-  <section name="step2" header="ignored header" footer="Reply A-D" auto-select>
+  <section name="step2" header="ignored header" footer="Reply A-D" auto-select numbered required>
     <header>SETUP CITY</header>
     <label>Choose your city:</label>
     <ul>

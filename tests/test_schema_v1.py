@@ -208,18 +208,21 @@ class TestModel(TestCase):
                     {
                         "type": "option",
                         "description": "First item",
+                        "text_search": None,
                         "method": "GET",
                         "path": "/callback-url/item1"
                     },
                     {
                         "type": "option",
                         "description": "Second item",
+                        "text_search": None,
                         "method": "GET",
                         "path": "/callback-url/item2"
                     },
                     {
                         "type": "option",
                         "description": "Third item",
+                        "text_search": None,
                         "method": "POST",
                         "path": "/callback-url/item3"
                     }
@@ -254,24 +257,28 @@ class TestModel(TestCase):
                     {
                         "type": "option",
                         "description": "Route 1",
+                        "text_search": None,
                         "method": "POST",
                         "path": "/route1"
                     },
                     {
                         "type": "option",
                         "description": "Route 2",
+                        "text_search": None,
                         "method": 'GET',
                         "path": "/route2"
                     },
                     {
                         "type": "content",
                         "description": "Separator",
+                        "text_search": None,
                         "method": None,
                         "path": None
                     },
                     {
                         "type": "option",
                         "description": "Route 3",
+                        "text_search": None,
                         "method": 'GET',
                         "path": "/route3"
                     }
@@ -365,7 +372,7 @@ class TestModel(TestCase):
                         "type": "float",
                         "name": "step1",
                         "description": "What is your height?",
-                        "header": "SETUP NAME",
+                        "header": "SETUP HEIGHT",
                         "footer": "Reply with text",
                         "body": None,
                         "value": None,
@@ -385,7 +392,7 @@ class TestModel(TestCase):
                             "numbered": False
                         },
                         "method": None,
-                        "required": False,
+                        "required": True,
                         "status_exclude": False,
                         "status_prepend": False,
                         "url": None,
@@ -451,10 +458,10 @@ class TestModel(TestCase):
                         "meta": {
                             "auto_select": True,
                             "multi_select": False,
-                            "numbered": False
+                            "numbered": True
                         },
                         "method": None,
-                        "required": False,
+                        "required": True,
                         "status_exclude": False,
                         "status_prepend": False,
                         "url": None,

@@ -37,6 +37,10 @@ class MenuItem(BaseModel):
         ...,
         description='The displayed text of a menu item.'
     )
+    text_search: str = Schema(
+        None,
+        description='Field to add more context for searching in options'
+    )
     method: HttpMethod = Schema(
         None,
         description='The HTTP method called when the menu item is selected.'
@@ -46,13 +50,14 @@ class MenuItem(BaseModel):
         description='The path called when the menu item is selected.'
     )
 
-    def __init__(self, description: str, method: HttpMethod = None, path: str = None):
+    def __init__(self, description: str, text_search: str = None,
+                 method: HttpMethod = None, path: str = None):
         if path:
             type = MenuItemType.option
         else:
             type = MenuItemType.content
-        super(MenuItem, self).__init__(type=type, description=description, method=method,
-                                       path=path)
+        super(MenuItem, self).__init__(type=type, description=description,
+                                       text_search=text_search, method=method, path=path)
 
     @classmethod
     def from_tag(cls, tag: Union[LiTag, PTag, BrTag, str]) -> Optional['MenuItem']:
@@ -66,13 +71,16 @@ class MenuItem(BaseModel):
 
         method = None
         path = None
+        text_search = None
 
         if isinstance(tag, LiTag) and isinstance(tag.children[0], ATag):
             atag: ATag = tag.children[0]
             method = atag.attrs.method
             path = atag.attrs.href
+            text_search = tag.attrs.text_search
 
-        return MenuItem(description=description, method=method, path=path)
+        return MenuItem(description=description, text_search=text_search, method=method,
+                        path=path)
 
 
 MenuItem.update_forward_refs()
@@ -151,11 +159,6 @@ class FormItemType(str, Enum):
     form_menu = 'form-menu'  # the user should choose an option from the menu
 
 
-class FormItemMenuItemType(str, Enum):
-    option = 'option'
-    content = 'content'
-
-
 class MenuItemFormItem(BaseModel):
     """
     An item in a form's menu
@@ -210,7 +213,7 @@ MenuItemFormItem.update_forward_refs()
 
 class MenuFormItemMeta(BaseModel):
     """
-    Configuration fields for a `FormItemMenu`
+    Configuration fields for a `FormItem`
     """
     auto_select: bool = Schema(
         False,
@@ -368,14 +371,6 @@ class FormItem(BaseModel):
                         content_types_map[InputTagType.number] = FormItemType.int
                     else:
                         content_types_map[InputTagType.number] = FormItemType.float
-                    min_value = child.attrs.min
-                    min_value_error = child.attrs.min_error
-                    min_length = child.attrs.minlength
-                    min_length_error = child.attrs.maxlength_error
-                    max_value = child.attrs.max
-                    max_value_error = child.attrs.max_error
-                    max_length = child.attrs.maxlength
-                    max_length_error = child.attrs.maxlength_error
 
                 # Check if hidden input declares attribute "value"
                 if input_type == InputTagType.hidden:
@@ -384,6 +379,16 @@ class FormItem(BaseModel):
                         raise ONEmSDKException(
                             'value attribute is required for input type="hidden"'
                         )
+
+                min_value = child.attrs.min
+                min_value_error = child.attrs.min_error
+                min_length = child.attrs.minlength
+                min_length_error = child.attrs.maxlength_error
+                max_value = child.attrs.max
+                max_value_error = child.attrs.max_error
+                max_length = child.attrs.maxlength
+                max_length_error = child.attrs.maxlength_error
+
                 # Ignore other <input> tags if exist
                 break
             if isinstance(child, UlTag):
@@ -486,7 +491,9 @@ class Form(BaseModel):
         description='Sequence of components used to acquire the pieces of data needed from user'
     )
     method: HttpMethod = Schema(
-        HttpMethod.POST, description='The HTTP method used to send the form data')
+        HttpMethod.POST,
+        description='The HTTP method used to send the form data'
+    )
     path: str = Schema(..., description='The path used to send the form data')
     header: str = Schema(
         None,
@@ -503,8 +510,6 @@ class Form(BaseModel):
         body = []
         for section in form_tag.children:
             body.append(FormItem.from_tag(section))
-
-        assert len(body) == len(form_tag.children)
 
         form = Form(
             header=form_tag.attrs.header,

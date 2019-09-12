@@ -491,7 +491,9 @@ class Form(BaseModel):
         description='Sequence of components used to acquire the pieces of data needed from user'
     )
     method: HttpMethod = Schema(
-        HttpMethod.POST, description='The HTTP method used to send the form data')
+        HttpMethod.POST,
+        description='The HTTP method used to send the form data'
+    )
     path: str = Schema(..., description='The path used to send the form data')
     header: str = Schema(
         None,

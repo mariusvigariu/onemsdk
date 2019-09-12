@@ -26,13 +26,14 @@ setup(
     author_email='romeo.tudureanu@onem.com',
     keywords='sdk onem python',
     packages=find_packages(exclude=['contrib', 'docs', 'tests', 'scripts']),
-    python_requires='>=3.7, <4',
+    python_requires='>=3.6, <4',
     install_requires=required_packages,
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
         'Topic :: Software Development :: Build Tools',
         'License :: OSI Approved :: MIT License',
+        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
     ],
     project_urls={

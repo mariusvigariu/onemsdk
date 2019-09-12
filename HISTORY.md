@@ -1,5 +1,9 @@
 # History
 
+---
+## 0.6.0
+- Decreased the minimum Python version to 3.6.
+
 - HTML API:
   - Added a bunch of new attributes on `<input>`: `min`, `min_error`,
   `minlength`, `minlength_error`, `max`, `max_error`, `maxlength`,

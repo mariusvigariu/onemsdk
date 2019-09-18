@@ -54,6 +54,7 @@ class MenuItem(BaseModel):
                  method: HttpMethod = None, path: str = None):
         if path:
             type = MenuItemType.option
+            method = method or HttpMethod.GET
         else:
             type = MenuItemType.content
         super(MenuItem, self).__init__(type=type, description=description,
@@ -157,6 +158,9 @@ class FormItemType(str, Enum):
     int = 'int'  # the user should enter an integer
     float = 'float'  # the user could enter a floating number
     form_menu = 'form-menu'  # the user should choose an option from the menu
+    email = 'email'  # the user should send a valid email address
+    url = 'url'  # the user should send a valid url
+    location = 'location'  # the user should send a valid location
 
 
 class MenuItemFormItem(BaseModel):

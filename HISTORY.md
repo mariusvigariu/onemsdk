@@ -1,5 +1,11 @@
 # History
 
+- HTML API:
+    - Added new `<input>` types: "email", "location", "url".
+- Python API:
+    - Added new `FormItem` types: "email", "location", "url".
+- Added tests
+
 ---
 ## 0.6.0
 - Decreased the minimum Python version to 3.6.

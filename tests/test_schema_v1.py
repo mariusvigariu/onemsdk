@@ -2,10 +2,13 @@ import json
 import os
 from unittest import TestCase
 
+from pydantic import ValidationError
+
 from onemsdk import set_static_dir
+from onemsdk.exceptions import ONEmSDKException
 from onemsdk.parser import SectionTag
 from onemsdk.parser.util import load_html
-from onemsdk.schema.v1 import Response
+from onemsdk.schema.v1 import Response, FormItem, FormItemType
 
 set_static_dir(os.path.join(os.path.dirname(__file__), 'static'))
 
@@ -595,3 +598,113 @@ class TestModel(TestCase):
             }
         }
         self.assertEqual(json.dumps(expected), response.json())
+
+
+class TestFormItem(TestCase):
+    def test_from_tag__should_raise_error_for_invalid_type(self):
+        html = """
+        <section name="name">
+            <input type="blabla"/>
+        </section>
+        """
+
+        with self.assertRaises(ValidationError) as context:
+            section_tag = load_html(html_str=html)
+            form_item = FormItem.from_tag(section_tag)
+
+        self.assertIn(
+            "value is not a valid enumeration member; permitted: 'text', 'date', 'number', 'hidden', 'email', 'url', 'datetime', 'location'",
+            str(context.exception)
+        )
+
+    def test_from_tag__should_raise_error_if_type_hidden_and_no_value(self):
+        html = """
+        <section name="name">
+            <input type="hidden"/>
+        </section>
+        """
+        section_tag = load_html(html_str=html)
+
+        with self.assertRaises(ONEmSDKException) as context:
+            form_item = FormItem.from_tag(section_tag)
+
+        self.assertIn('value attribute is required for input type="hidden"',
+                      str(context.exception))
+
+    def test_from_tag__should_correctly_parse_int_float_from_number(self):
+        html = """
+        <section name="name">
+            <input type="number" step="1"/>
+        </section>
+        """
+        section_tag = load_html(html_str=html)
+        form_item = FormItem.from_tag(section_tag)
+        self.assertEqual(form_item.type, FormItemType.int)
+
+        html = """
+        <section name="name">
+            <input type="number"/>
+        </section>
+        """
+        section_tag = load_html(html_str=html)
+        form_item = FormItem.from_tag(section_tag)
+        self.assertEqual(form_item.type, FormItemType.float)
+
+    def test_from_tag__should_correctly_parse_complex_section_tag(self):
+        html = """
+        <section name="first-step"
+                 header="The header"
+                 footer="The footer"
+                 chunking-footer="Chunking footer"
+                 confirmation-label="Conf label"
+                 method="PATCH"
+                 status-exclude
+                 url="https://url.url"
+                 validate-type-error="The validate type err"
+                 validate-type-error-footer="The val type err footer"
+                 validate-url="The val url"
+                 auto-select
+                 numbered
+                 required>
+            <input type="email"
+                   minlength="3"
+                   minlength-error="The minlen error"
+                   maxlength="100"
+                   maxlength-error="The maxlen error" />
+        </section>
+        """
+        section_tag = load_html(html_str=html)
+        form_item = FormItem.from_tag(section_tag)
+        expected = {
+            "type": "email",
+            "name": "first-step",
+            "description": "",
+            "header": "The header",
+            "footer": "The footer",
+            "body": None,
+            "value": None,
+            "chunking_footer": "Chunking footer",
+            "confirmation_label": "Conf label",
+            "min_length": 3,
+            "min_length_error": "The maxlen error",
+            "max_length": 100,
+            "max_length_error": "The maxlen error",
+            "min_value": None,
+            "min_value_error": None,
+            "max_value": None,
+            "max_value_error": None,
+            "meta": {
+                "auto_select": True,
+                "multi_select": False,
+                "numbered": True
+            },
+            "method": "PATCH",
+            "required": True,
+            "status_exclude": True,
+            "status_prepend": False,
+            "url": "https://url.url",
+            "validate_type_error": "The validate type err",
+            "validate_type_error_footer": "The val type err footer",
+            "validate_url": "The val url"
+        }
+        self.assertEqual(json.dumps(expected), form_item.json())

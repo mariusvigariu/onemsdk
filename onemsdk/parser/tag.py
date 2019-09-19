@@ -93,25 +93,34 @@ FooterTag.update_forward_refs()
 
 
 class InputTagType(str, Enum):
+    # standard HTML5 input values
     text = 'text'
     date = 'date'
-    datetime = 'datetime'
     number = 'number'
     hidden = 'hidden'
+    email = 'email'
+    url = 'url'
+
+    # not standard
+    datetime = 'datetime'
+    location = 'location'
 
 
 class InputTagAttrs(BaseModel):
+    # standard HTML5 attributes
     type: InputTagType
     min: Union[int, float] = None
-    min_error: str = None  # Does not exist in HTML5
-    minlength: int = None  # Does not exist in HTML5, but it's needed
-    minlength_error: str = None  # Does not exist in HTML5
+    minlength: int = None
     max: Union[int, float] = None
-    max_error: str = None  # Does not exist in HTML5
     maxlength: int = None
-    maxlength_error: str = None  # Does not exist in HTML5
-    step: int = None  # type="number" with step="1" will be translated as integer
+    step: int = None
     value: str = None  # only for type="hidden"
+
+    # not standard
+    min_error: str = None
+    minlength_error: str = None
+    max_error: str = None
+    maxlength_error: str = None
 
 
 class InputTag(Tag):
@@ -126,7 +135,7 @@ class InputTag(Tag):
     @classmethod
     def get_attrs(cls, node: Node):
         return InputTagAttrs(
-            type=InputTagType(node.attrs.get('type')),
+            type=node.attrs.get('type'),
             min=node.attrs.get('min'),
             min_error=node.attrs.get('min-error'),
             minlength=node.attrs.get('minlength'),
@@ -362,11 +371,11 @@ class SectionTag(Tag):
                 else:
                     rendered_children.append(text)
 
-        if rendered_children[-1] == '\n':
-            del rendered_children[-1]
-
         # Remove the temporary \n
         del rendered_children[0]
+
+        if rendered_children and rendered_children[-1] == '\n':
+            del rendered_children[-1]
 
         return ''.join(rendered_children)
 

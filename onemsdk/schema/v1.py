@@ -362,6 +362,9 @@ class FormItem(BaseModel):
             InputTagType.datetime: FormItemType.datetime,
             InputTagType.text: FormItemType.string,
             InputTagType.hidden: FormItemType.hidden,
+            InputTagType.email: FormItemType.email,
+            InputTagType.location: FormItemType.location,
+            InputTagType.url: FormItemType.url,
         }
 
         for child in section.children:

@@ -686,7 +686,7 @@ class TestFormItem(TestCase):
             "chunking_footer": "Chunking footer",
             "confirmation_label": "Conf label",
             "min_length": 3,
-            "min_length_error": "The maxlen error",
+            "min_length_error": "The minlen error",
             "max_length": 100,
             "max_length_error": "The maxlen error",
             "min_value": None,

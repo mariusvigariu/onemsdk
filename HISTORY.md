@@ -5,6 +5,9 @@
 - Python API:
     - Added new `FormItem` types: "email", "location", "url".
 - Added tests
+- Bug fixes:
+    - input attribute `maxlength_error` was assigned to both
+    `FormItem.min_length_error` and `FormItem.max_length_error`
 
 ---
 ## 0.6.0

@@ -390,7 +390,7 @@ class FormItem(BaseModel):
                 min_value = child.attrs.min
                 min_value_error = child.attrs.min_error
                 min_length = child.attrs.minlength
-                min_length_error = child.attrs.maxlength_error
+                min_length_error = child.attrs.minlength_error
                 max_value = child.attrs.max
                 max_value_error = child.attrs.max_error
                 max_length = child.attrs.maxlength

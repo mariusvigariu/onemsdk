@@ -1,5 +1,6 @@
 import json
 import os
+from os.path import dirname, abspath
 
 import oyaml as yaml
 from pydantic.schema import schema
@@ -8,13 +9,18 @@ from onemsdk.schema.v1 import (
     MenuItem, Menu, FormItem, MenuItemFormItem, Form, Response
 )
 
-begin = """
+BASE_DIR: str = dirname(dirname(abspath(__file__)))
+
+with open(BASE_DIR + '/OPENAPI_SCHEMA_VERSION') as f:
+    OPENAPI_SCHEMA_VERSION = f.read()
+
+begin = f"""
 openapi: 3.0.0
 info:
-  version: 'm1'
+  version: v{OPENAPI_SCHEMA_VERSION}
   title: 'ONEm JSON response schema'
   description: ''
-paths: {}
+paths: {{}}
 servers:
   - description: SwaggerHub API Auto Mocking
     url: https://virtserver.swaggerhub.com/romeo1m/schemajson/v1

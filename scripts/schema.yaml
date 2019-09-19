@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  version: m5.3
+  version: v1.0
   title: ONEm JSON response schema
   description: ''
 paths: {}
@@ -157,6 +157,9 @@ components:
           - int
           - float
           - form-menu
+          - email
+          - url
+          - location
           type: string
         name:
           title: Name

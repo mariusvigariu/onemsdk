@@ -1,5 +1,7 @@
 # History
 
+---
+## 0.7.0
 - HTML API:
     - Added new `<input>` types: "email", "location", "url".
 - Python API:

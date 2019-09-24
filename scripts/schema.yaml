@@ -11,28 +11,33 @@ components:
   schemas:
     MenuItem:
       title: MenuItem
-      description: An item in a menu. Depending on its type, a menu item can be either
-        an option (type=option) or an option separator (type=content)
+      description: '[`Menu`](#menu) related component used to display menu items,
+        selectable or
+
+        raw'
       type: object
       properties:
         type:
           title: Type
-          description: The type of the menu item.
+          description: Indicates the type of the object
           enum:
           - option
           - content
           type: string
         description:
           title: Description
-          description: The displayed text of a menu item.
+          description: The displayed text for this `MenuItem`
           type: string
         text_search:
           title: Text_Search
-          description: Field to add more context for searching in options
+          description: If the user does not send a proper option marker and sends
+            some input, this field will be used to search and narrow down the options
+            against the user input. <br> max 1000 chars
           type: string
         method:
           title: Method
-          description: The HTTP method called when the menu item is selected.
+          description: HTTP method indicating how to trigger the callback path. Defaults
+            to `"GET"`
           enum:
           - GET
           - POST
@@ -45,110 +50,123 @@ components:
           type: string
         path:
           title: Path
-          description: The path called when the menu item is selected.
+          description: Next route callback path, accessed upon user selection <br>
+            _required only for `type=option`_
           type: string
       required:
       - type
       - description
     MenuMeta:
       title: MenuMeta
-      description: Configuration fields for `Menu`
+      description: "[`Menu`](#menu) related component holding configuration fields\
+        \ for the menu\n "
       type: object
       properties:
         auto_select:
           title: Auto_Select
-          description: If the `Menu` has only one option, it is automatically selected,
-            without asking the user for selection
+          description: Will be automatically selected if set to `true` and in case
+            of a single option in the menu
           default: false
           type: boolean
     Menu:
       title: Menu
-      description: A top level component that permits displaying a navigable menu
-        or a plain text.
+      description: A top level component used to display a menu or raw text
       type: object
       properties:
         type:
           title: Type
-          description: The type of the Menu object is always "menu"
+          description: Indicates the type of the object, defaults to `"menu"`
           const: menu
           type: string
         body:
           title: Body
-          description: The body/content of the menu
+          description: Composed of [`MenuItem`](#menuitem) objects
           type: array
           items:
             $ref: '#/components/schemas/MenuItem'
         header:
           title: Header
-          description: The header of the menu.
+          description: The header of the menu
           type: string
         footer:
           title: Footer
-          description: The header of the menu.
+          description: The header of the menu
           type: string
         meta:
           title: Meta
-          description: Configuration fields for `Menu`
+          description: '[`MenuMeta`](#menumeta) object. Contains configuration flags'
           allOf:
           - $ref: '#/components/schemas/MenuMeta'
       required:
       - body
     MenuItemFormItem:
       title: MenuItemFormItem
-      description: An item in a form's menu
+      description: '[`FormItem`](#formitem) related component used to display menu
+        items,
+
+        selectable or raw'
       type: object
       properties:
         type:
           title: Type
-          description: The type of a menu item inside a form
+          description: Indicates the type of the object
           enum:
           - option
           - content
           type: string
         description:
           title: Description
-          description: The description of this MenuItemFormItem
+          description: The description for this `MenuItemFormItem`
           type: string
         value:
           title: Value
-          description: The value of this MenuItemFormItem, used in form serialization
+          description: The value for this `MenuItemFormItem`, used in form serialization
+            <br> _required only for `type=option`_
           type: string
         text_search:
           title: Text_Search
-          description: Field to add more context for searching in options
+          description: If the user does not send a proper option marker and sends
+            some input, this field will be used to search and narrow down the options
+            against the user input <br> max 1000 chars
           type: string
       required:
       - type
       - description
     MenuFormItemMeta:
       title: MenuFormItemMeta
-      description: Configuration fields for a `FormItem`
+      description: '[`FormItem`](#formitem) related component holding configuration
+        field for
+
+        a menu inside a form item'
       type: object
       properties:
         auto_select:
           title: Auto_Select
-          description: Will be automatically selected if set to true and in case of
-            a single option in the menu
+          description: Will be automatically selected if set to `true` and in case
+            of a single option in the menu
           default: false
           type: boolean
         multi_select:
           title: Multi_Select
-          description: It allows multiple options to be selected
+          description: Allows multiple options to be selected
           default: false
           type: boolean
         numbered:
           title: Numbered
-          description: Display numbers instead of letter option markers
+          description: Displays numbers instead of letter option markers
           default: false
           type: boolean
     FormItem:
       title: FormItem
-      description: Component used to ask a user for a certain type of free input
+      description: '[`Form`](#form) related component used to acquire certain information
+        from
+
+        the user'
       type: object
       properties:
         type:
           title: Type
-          description: The type of data expected from the user
+          description: Indicates the type of the object
           enum:
           - string
           - date
@@ -163,29 +181,31 @@ components:
           type: string
         name:
           title: Name
-          description: The name of this FormItem, used in form serialization
+          description: The name of this `FormItem`, used in form serialization
           type: string
         description:
           title: Description
-          description: The description of this FormItem
+          description: The description of this `FormItem`
           type: string
         header:
           title: Header
-          description: If provided will overwrite the Form.header
+          description: If provided will overwrite the `Form.header`
           type: string
         footer:
           title: Footer
-          description: If provided will overwrite the Form.footer
+          description: If provided will overwrite the `Form.footer`
           type: string
         body:
           title: Body
-          description: Required only for type=form-menu
+          description: Composed of [`MenuItemFormItem`](#menuitemformitem) objects
+            <br> _required only for `type=form-menu`_
           type: array
           items:
             $ref: '#/components/schemas/MenuItemFormItem'
         value:
           title: Value
-          description: Required for type=hidden
+          description: Value to pass in the form serialization data <br> _applies
+            only for `type=hidden`_
           type: string
         chunking_footer:
           title: Chunking_Footer
@@ -197,44 +217,45 @@ components:
           type: string
         min_length:
           title: Min_Length
-          description: Validates the user input - for type=string
+          description: Validates the user input <br> _applies only for `type=string`_
           type: integer
         min_length_error:
           title: Min_Length_Error
-          description: Message to be shown on min_length error
+          description: Message to be shown on `min_length` error
           type: string
         max_length:
           title: Max_Length
-          description: Validates the user input - for type=string
+          description: Validates the user input <br> _applies only for `type=string`_
           type: integer
         max_length_error:
           title: Max_Length_Error
-          description: Message to be shown on max_length error
+          description: Message to be shown on `max_length` error
           type: string
         min_value:
           title: Min_Value
-          description: Validates the user input - for type=int|float
+          description: Validates the user input <br> _applies only for `type=int|float`_
           type: number
         min_value_error:
           title: Min_Value_Error
-          description: Message to be shown on min_value error
+          description: Message to be shown on `min_value` error
           type: string
         max_value:
           title: Max_Value
-          description: Validates the user input - for type=int|float
+          description: Validates the user input <br> _applies only for `type=int|float`_
           type: number
         max_value_error:
           title: Max_Value_Error
-          description: Message to be shown on max_value error
+          description: Message to be shown on `max_value` error
           type: string
         meta:
           title: Meta
-          description: Applies only for type=form-menu
+          description: '[`MenuFormItemMeta`](#menuformitemmeta) object <br> _applies
+            only for `type=form-menu`_'
           allOf:
           - $ref: '#/components/schemas/MenuFormItemMeta'
         method:
           title: Method
-          description: http method, how the callback url should be triggered
+          description: Http method, how the callback url should be triggered
           enum:
           - GET
           - POST
@@ -247,19 +268,19 @@ components:
           type: string
         required:
           title: Required
-          description: Can be skipped if set to false
+          description: User can `SKIP` this `FormItem` if set to `false`
           default: false
           type: boolean
         status_exclude:
           title: Status_Exclude
-          description: If true this step will be excluded from the form completion
+          description: If `true` this step will be excluded from the form completion
             status
           default: false
           type: boolean
         status_prepend:
           title: Status_Prepend
-          description: If true this step will be prepended to the body pre of the
-            response - appended otherwise
+          description: If `true` this step will be prepended to the body of the response.
+            Appended otherwise
           default: false
           type: boolean
         url:
@@ -277,9 +298,10 @@ components:
           type: string
         validate_url:
           title: Validate_Url
-          description: 'the callback url path (GET) triggered to validate user input
-            with query string ?name=user_input - url must return json content {"valid":
-            True/False, "error": "Some validation error message"}'
+          description: 'The callback url path `"GET"` triggered to validate user input.
+            <br> A query string is sent by ONEm: `?form_item_name=user_input` <br>
+            The validate_url must return a json response: `{"valid": true/false, "error":
+            "Some message in case of validation errors"}`'
           type: string
       required:
       - type
@@ -287,45 +309,48 @@ components:
       - description
     FormMeta:
       title: FormMeta
-      description: Configuration fields for a Form
+      description: '[`Form`](#form) related component holding configuration fields
+        for the form'
       type: object
       properties:
         completion_status_show:
           title: Show completion status
-          description: Whether to display the completions status
+          description: If `true` will show a completion status. Defaults to `false`
           default: false
           type: boolean
         completion_status_in_header:
           title: Show completion status in header
-          description: Whether to display the completion status in header
+          description: If `true` will indicate the status in the header. Defaults
+            to `false`, which means it will be shown below header if the completion
+            status is shown
           default: false
           type: boolean
         confirmation_needed:
           title: Confirmation needed
-          description: Whether to add an additional item at the end of the form for
-            confirmation
-          default: false
+          description: If `false` will not ask for confirmation. Defaults to `true`
+          default: true
           type: boolean
     Form:
       title: Form
-      description: A top level component used to acquire information from user
+      description: A top level component used to acquire information from the user
       type: object
       properties:
         type:
           title: Type
-          description: The type of a form is always form
+          description: Indicates the type of the object, defaults to `"form"`
           const: form
           type: string
         body:
           title: Body
-          description: Sequence of components used to acquire the pieces of data needed
-            from user
+          description: Sequence of [`FormItem`](#formitem) objects used to acquire
+            information from user
           type: array
           items:
             $ref: '#/components/schemas/FormItem'
         method:
           title: Method
-          description: The HTTP method used to send the form data
+          description: HTTP method indicating how to trigger the callback path. Defaults
+            to `"POST"`
           default: POST
           enum:
           - GET
@@ -339,7 +364,7 @@ components:
           type: string
         path:
           title: Path
-          description: The path used to send the form data
+          description: The callback path used to send the serialized form data
           type: string
         header:
           title: Header
@@ -353,7 +378,7 @@ components:
           type: string
         meta:
           title: Meta
-          description: Contains configuration flags
+          description: '[`FormMeta`](#formmeta) object. Contains configuration flags'
           allOf:
           - $ref: '#/components/schemas/FormMeta'
       required:
@@ -361,21 +386,19 @@ components:
       - path
     Response:
       title: Response
-      description: A JSON-serialized instance of Response must be sent as response
-        to the ONEm platform. It can be built only from a top level object (Menu,
-        Form).
+      description: Root component wrapping a `Menu` or a `Form`
       type: object
       properties:
         content_type:
           title: Content type
-          description: The type of the content of the response
+          description: The content type of the response
           enum:
           - form
           - menu
           type: string
         content:
           title: Content
-          description: The content of the response
+          description: The content of the response. Either `Form` or a `Menu`
           anyOf:
           - allOf:
             - $ref: '#/components/schemas/Form'

@@ -268,7 +268,7 @@ class FormItem(BaseModel):
         ...,
         description='The name of this `FormItem`, used in form serialization'
     )
-    description: str = Schema(..., description='The description of this `FormItem`')
+    description: str = Schema(None, description='The description of this `FormItem`')
     header: str = Schema(None, description='If provided will overwrite the `Form.header`')
     footer: str = Schema(None, description='If provided will overwrite the `Form.footer`')
     body: List['MenuItemFormItem'] = Schema(
@@ -371,6 +371,18 @@ class FormItem(BaseModel):
 
     def __init__(self, **data):
         super(FormItem, self).__init__(**data)
+        if self.body is not None:
+            if self.type != FormItemType.form_menu:
+                raise ONEmSDKException(
+                    f'When "body" param is filled, the type of the '
+                    f'FormItem must be {FormItemType.form_menu}'
+                )
+        if self.body is None:
+            if self.type == FormItemType.form_menu:
+                raise ONEmSDKException(
+                    f'When type of FormItem is {FormItemType.form_menu}, '
+                    f'"body" param must be filled.'
+                )
 
     @classmethod
     def from_tag(cls, section: SectionTag) -> 'FormItem':
@@ -386,6 +398,7 @@ class FormItem(BaseModel):
         max_value_error = None
         max_length = None
         max_length_error = None
+        description = None
 
         content_types_map = {
             InputTagType.date: FormItemType.date,
@@ -425,6 +438,7 @@ class FormItem(BaseModel):
                 max_value_error = child.attrs.max_error
                 max_length = child.attrs.maxlength
                 max_length_error = child.attrs.maxlength_error
+                description = section.render(True, True)
 
                 # Ignore other <input> tags if exist
                 break
@@ -432,8 +446,20 @@ class FormItem(BaseModel):
                 # Hack with an invalid input type to avoid KeyError
                 input_type = 'option'
                 content_types_map[input_type] = FormItemType.form_menu
-                for li in child.children:
-                    body.append(MenuItemFormItem.from_tag(li))
+                for child2 in section.children:
+                    if isinstance(child2, UlTag):
+                        for li in child.children:
+                            menu_item_form_item = MenuItemFormItem.from_tag(li)
+                            if menu_item_form_item:
+                                body.append(menu_item_form_item)
+                    elif isinstance(child2, HeaderTag):
+                        pass
+                    elif isinstance(child2, FooterTag):
+                        pass
+                    else:
+                        menu_item_form_item = MenuItemFormItem.from_tag(child2)
+                        if menu_item_form_item:
+                            body.append(menu_item_form_item)
                 break
         else:
             raise ONEmSDKException(
@@ -449,7 +475,7 @@ class FormItem(BaseModel):
         return FormItem(
             type=content_types_map[input_type],
             name=section.attrs.name,
-            description=section.render(exclude_header=True, exclude_footer=True),
+            description=description,
             header=header or section.attrs.header,
             footer=footer or section.attrs.footer,
             body=body or None,

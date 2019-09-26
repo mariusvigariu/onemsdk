@@ -415,7 +415,7 @@ class FormTagAttrs(BaseModel):
 
     completion_status_show: bool = False
     completion_status_in_header: bool = False
-    confirmation_needed: bool = False
+    confirmation_needed: bool = True
 
 
 class FormTag(Tag):

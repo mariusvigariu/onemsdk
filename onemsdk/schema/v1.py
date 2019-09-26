@@ -508,7 +508,7 @@ class FormMeta(BaseModel):
     def __init__(self,
                  completion_status_show: bool = False,
                  completion_status_in_header: bool = False,
-                 confirmation_needed: bool = False):
+                 confirmation_needed: bool = True):
         super(FormMeta, self).__init__(
             completion_status_in_header=completion_status_in_header,
             completion_status_show=completion_status_show,

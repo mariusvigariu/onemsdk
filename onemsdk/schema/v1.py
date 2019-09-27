@@ -27,27 +27,33 @@ class HttpMethod(str, Enum):
 
 class MenuItem(BaseModel):
     """
-    An item in a menu. Depending on its type, a menu item can be either an option (type=option) or an option separator (type=content)
+    [`Menu`](#menu) related component used to display menu items, selectable or
+    raw
     """
     type: MenuItemType = Schema(
         ...,
-        description='The type of the menu item.'
+        description='Indicates the type of the object'
     )
     description: str = Schema(
         ...,
-        description='The displayed text of a menu item.'
+        description='The displayed text for this `MenuItem`'
     )
     text_search: str = Schema(
         None,
-        description='Field to add more context for searching in options'
+        description='If the user does not send a proper option marker and '
+                    'sends some input, this field will be used to search and '
+                    'narrow down the options against the user input. <br> max'
+                    ' 1000 chars'
     )
     method: HttpMethod = Schema(
         None,
-        description='The HTTP method called when the menu item is selected.'
+        description='HTTP method indicating how to trigger the callback path. '
+                    'Defaults to `"GET"`'
     )
     path: str = Schema(
         None,
-        description='The path called when the menu item is selected.'
+        description='Next route callback path, accessed upon user selection '
+                    '<br> _required only for `type=option`_'
     )
 
     def __init__(self, description: str, text_search: str = None,
@@ -89,12 +95,12 @@ MenuItem.update_forward_refs()
 
 class MenuMeta(BaseModel):
     """
-    Configuration fields for `Menu`
+   [`Menu`](#menu) related component holding configuration fields for the menu
     """
     auto_select: bool = Schema(
         False,
-        description='If the `Menu` has only one option, it is automatically selected, '
-                    'without asking the user for selection'
+        description='Will be automatically selected if set to `true` and in '
+                    'case of a single option in the menu'
     )
 
 
@@ -103,18 +109,23 @@ MenuMeta.update_forward_refs()
 
 class Menu(BaseModel):
     """
-    A top level component that permits displaying a navigable menu or a plain text.
+    A top level component used to display a menu or raw text
     """
     type: str = Schema(
         'menu',
-        description='The type of the Menu object is always "menu"',
+        description='Indicates the type of the object, defaults to `"menu"`',
         const=True
     )
-    body: List[MenuItem] = Schema(..., description='The body/content of the menu')
-    header: str = Schema(None, description='The header of the menu.')
-    footer: str = Schema(None, description='The header of the menu.')
+    body: List[MenuItem] = Schema(
+        ..., description='Composed of [`MenuItem`](#menuitem) objects')
+    header: str = Schema(None, description='The header of the menu')
+    footer: str = Schema(None, description='The header of the menu')
 
-    meta: MenuMeta = Schema(None, description='Configuration fields for `Menu`')
+    meta: MenuMeta = Schema(
+        None,
+        description='[`MenuMeta`](#menumeta) object. Contains configuration '
+                    'flags'
+    )
 
     def __init__(self, body: List[MenuItem], header: str = None, footer: str = None,
                  meta: MenuMeta = None):
@@ -165,20 +176,26 @@ class FormItemType(str, Enum):
 
 class MenuItemFormItem(BaseModel):
     """
-    An item in a form's menu
+    [`FormItem`](#formitem) related component used to display menu items,
+    selectable or raw
     """
     type: MenuItemType = Schema(
         ...,
-        description='The type of a menu item inside a form'
+        description='Indicates the type of the object'
     )
-    description: str = Schema(..., description='The description of this MenuItemFormItem')
+    description: str = Schema(
+        ..., description='The description for this `MenuItemFormItem`')
     value: str = Schema(
         None,
-        description='The value of this MenuItemFormItem, used in form serialization'
+        description='The value for this `MenuItemFormItem`, used in form '
+                    'serialization <br> _required only for `type=option`_'
     )
     text_search: str = Schema(
         None,
-        description='Field to add more context for searching in options'
+        description='If the user does not send a proper option marker and '
+                    'sends some input, this field will be used to search '
+                    'and narrow down the options against the user input '
+                    '<br> max 1000 chars'
     )
 
     def __init__(self, description: str, value: str = None, text_search: str = None):
@@ -217,20 +234,21 @@ MenuItemFormItem.update_forward_refs()
 
 class MenuFormItemMeta(BaseModel):
     """
-    Configuration fields for a `FormItem`
+    [`FormItem`](#formitem) related component holding configuration field for
+    a menu inside a form item
     """
     auto_select: bool = Schema(
         False,
-        description='Will be automatically selected if set to true and in case of a '
-                    'single option in the menu'
+        description='Will be automatically selected if set to `true` and in '
+                    'case of a single option in the menu'
     )
     multi_select: bool = Schema(
         False,
-        description='It allows multiple options to be selected'
+        description='Allows multiple options to be selected'
     )
     numbered: bool = Schema(
         False,
-        description='Display numbers instead of letter option markers'
+        description='Displays numbers instead of letter option markers'
     )
 
 
@@ -239,26 +257,29 @@ MenuFormItemMeta.update_forward_refs()
 
 class FormItem(BaseModel):
     """
-    Component used to ask a user for a certain type of free input
+    [`Form`](#form) related component used to acquire certain information from
+    the user
     """
     type: FormItemType = Schema(
         ...,
-        description='The type of data expected from the user'
+        description='Indicates the type of the object'
     )
     name: str = Schema(
         ...,
-        description='The name of this FormItem, used in form serialization'
+        description='The name of this `FormItem`, used in form serialization'
     )
-    description: str = Schema(..., description='The description of this FormItem')
-    header: str = Schema(None, description='If provided will overwrite the Form.header')
-    footer: str = Schema(None, description='If provided will overwrite the Form.footer')
+    description: str = Schema(..., description='The description of this `FormItem`')
+    header: str = Schema(None, description='If provided will overwrite the `Form.header`')
+    footer: str = Schema(None, description='If provided will overwrite the `Form.footer`')
     body: List['MenuItemFormItem'] = Schema(
         None,
-        description='Required only for type=form-menu'
+        description='Composed of [`MenuItemFormItem`](#menuitemformitem) '
+                    'objects <br> _required only for `type=form-menu`_'
     )
     value: str = Schema(
         None,
-        description='Required for type=hidden'
+        description='Value to pass in the form serialization data '
+                    '<br> _applies only for `type=hidden`_'
     )
     chunking_footer: str = Schema(
         None,
@@ -270,59 +291,67 @@ class FormItem(BaseModel):
     )
     min_length: int = Schema(
         None,
-        description='Validates the user input - for type=string'
+        description='Validates the user input '
+                    '<br> _applies only for `type=string`_'
     )
     min_length_error: str = Schema(
         None,
-        description='Message to be shown on min_length error'
+        description='Message to be shown on `min_length` error'
     )
     max_length: int = Schema(
         None,
-        description='Validates the user input - for type=string'
+        description='Validates the user input '
+                    '<br> _applies only for `type=string`_'
     )
     max_length_error: str = Schema(
         None,
-        description='Message to be shown on max_length error'
+        description='Message to be shown on `max_length` error'
     )
     min_value: float = Schema(
         None,
-        description='Validates the user input - for type=int|float'
+        description='Validates the user input '
+                    '<br> _applies only for `type=int|float`_'
     )
     min_value_error: str = Schema(
         None,
-        description='Message to be shown on min_value error'
+        description='Message to be shown on `min_value` error'
     )
     max_value: float = Schema(
         None,
-        description='Validates the user input - for type=int|float'
+        description='Validates the user input '
+                    '<br> _applies only for `type=int|float`_'
     )
     max_value_error: str = Schema(
         None,
-        description='Message to be shown on max_value error'
+        description='Message to be shown on `max_value` error'
     )
     meta: 'MenuFormItemMeta' = Schema(
         None,
-        description='Applies only for type=form-menu'
+        description='[`MenuFormItemMeta`](#menuformitemmeta) object '
+                    '<br> _applies only for `type=form-menu`_'
     )
     method: HttpMethod = Schema(
         None,
-        description='http method, how the callback url should be triggered'
+        description='Http method, how the callback url should be triggered'
     )
     required: bool = Schema(
         False,
-        description='Can be skipped if set to false'
+        description='User can `SKIP` this `FormItem` if set to `false`'
     )
     status_exclude: bool = Schema(
         False,
-        description='If true this step will be excluded from the form completion status'
+        description='If `true` this step will be excluded from the form '
+                    'completion status'
     )
     status_prepend: bool = Schema(
         False,
-        description='If true this step will be prepended to the body pre of the response - appended otherwise'
+        description='If `true` this step will be prepended to the body of '
+                    'the response. Appended otherwise'
     )
     url: str = Schema(
         None,
-        description='Callback url triggered right after the choice has been set for this form item'
+        description='Callback url triggered right after the choice has been '
+                    'set for this form item'
     )
     validate_type_error: str = Schema(
         None,
@@ -334,9 +363,10 @@ class FormItem(BaseModel):
     )
     validate_url: str = Schema(
         None,
-        description='the callback url path (GET) triggered to validate user input with '
-                    'query string ?name=user_input - url must return json content '
-                    '{"valid": True/False, "error": "Some validation error message"}'
+        description='The callback url path `"GET"` triggered to validate user input. '
+                    '<br> A query string is sent by ONEm: `?form_item_name=user_input` '
+                    '<br> The validate_url must return a json response: '
+                    '`{"valid": true/false, "error": "Some message in case of validation errors"}`'
     )
 
     def __init__(self, **data):
@@ -455,28 +485,30 @@ FormItem.update_forward_refs()
 
 class FormMeta(BaseModel):
     """
-    Configuration fields for a Form
+    [`Form`](#form) related component holding configuration fields for the form
     """
     completion_status_show: bool = Schema(
         False,
         title='Show completion status',
-        description='Whether to display the completions status'
+        description='If `true` will show a completion status. Defaults to `false`'
     )
     completion_status_in_header: bool = Schema(
         False,
         title='Show completion status in header',
-        description='Whether to display the completion status in header'
+        description='If `true` will indicate the status in the header. '
+                    'Defaults to `false`, which means it will be shown below '
+                    'header if the completion status is shown'
     )
     confirmation_needed: bool = Schema(
-        False,
+        True,
         title='Confirmation needed',
-        description='Whether to add an additional item at the end of the form for confirmation'
+        description='If `false` will not ask for confirmation. Defaults to `true`'
     )
 
     def __init__(self,
                  completion_status_show: bool = False,
                  completion_status_in_header: bool = False,
-                 confirmation_needed: bool = False):
+                 confirmation_needed: bool = True):
         super(FormMeta, self).__init__(
             completion_status_in_header=completion_status_in_header,
             completion_status_show=completion_status_show,
@@ -489,19 +521,21 @@ FormMeta.update_forward_refs()
 
 class Form(BaseModel):
     """
-    A top level component used to acquire information from user
+    A top level component used to acquire information from the user
     """
-    type: str = Schema('form', description='The type of a form is always form',
+    type: str = Schema('form',
+                       description='Indicates the type of the object, defaults to `"form"`',
                        const=True)
     body: List[FormItem] = Schema(
         ...,
-        description='Sequence of components used to acquire the pieces of data needed from user'
+        description='Sequence of [`FormItem`](#formitem) objects used to acquire information from user'
     )
     method: HttpMethod = Schema(
         HttpMethod.POST,
-        description='The HTTP method used to send the form data'
+        description='HTTP method indicating how to trigger the callback path. '
+                    'Defaults to `"POST"`'
     )
-    path: str = Schema(..., description='The path used to send the form data')
+    path: str = Schema(..., description='The callback path used to send the serialized form data')
     header: str = Schema(
         None,
         description='The header of the form. It can be overwritten by each body component'
@@ -510,7 +544,7 @@ class Form(BaseModel):
         None,
         description='The footer of the form. It can be overwritten by each body component'
     )
-    meta: FormMeta = Schema(None, description='Contains configuration flags')
+    meta: FormMeta = Schema(None, description='[`FormMeta`](#formmeta) object. Contains configuration flags')
 
     @classmethod
     def from_tag(cls, form_tag: FormTag) -> 'Form':
@@ -543,16 +577,16 @@ class MessageContentType(str, Enum):
 
 class Response(BaseModel):
     """
-    A JSON-serialized instance of Response must be sent as response to the ONEm platform. It can be built only from a top level object (Menu, Form).
+    Root component wrapping a `Menu` or a `Form`
     """
     content_type: MessageContentType = Schema(
         ...,
         title='Content type',
-        description='The type of the content of the response'
+        description='The content type of the response'
     )
     content: Union[Form, Menu] = Schema(
         ...,
-        description='The content of the response'
+        description='The content of the response. Either `Form` or a `Menu`'
     )
 
     def __init__(self, content: Union[Menu, Form]):

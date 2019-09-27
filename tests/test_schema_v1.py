@@ -522,7 +522,7 @@ class TestModel(TestCase):
                 </section>
                 <section name="step2" method="POST" confirmation-label="confirmation label" required>
                    <label>A question</label>
-                   <input type="number" step="1" />
+                   <input type="number" step="1" pattern="[1-2]*" />
                 </section>
             </form>
         """
@@ -604,7 +604,7 @@ class TestModel(TestCase):
                         },
                         "method": "POST",
                         "required": True,
-                        "pattern": None,
+                        "pattern": "[1-2]*",
                         "status_exclude": False,
                         "status_prepend": False,
                         "url": None,
@@ -694,6 +694,7 @@ class TestFormItem(TestCase):
                  numbered
                  required>
             <input type="email"
+                   pattern="somepattern"
                    minlength="3"
                    minlength-error="The minlen error"
                    maxlength="100"
@@ -727,7 +728,7 @@ class TestFormItem(TestCase):
             },
             "method": "PATCH",
             "required": True,
-            "pattern": None,
+            "pattern": "somepattern",
             "status_exclude": True,
             "status_prepend": False,
             "url": "https://url.url",

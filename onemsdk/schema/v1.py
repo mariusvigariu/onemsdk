@@ -172,7 +172,6 @@ class FormItemType(str, Enum):
     email = 'email'  # the user should send a valid email address
     url = 'url'  # the user should send a valid url
     location = 'location'  # the user should send a valid location
-    regex = 'regex'  # validated against an ECMA script regex pattern
 
 
 class MenuItemFormItem(BaseModel):
@@ -342,7 +341,6 @@ class FormItem(BaseModel):
     pattern: str = Schema(
         None,
         description='ECMA Script regex pattern string'
-                    '<br> _applies only for `type=regex`_'
     )
     status_exclude: bool = Schema(
         False,
@@ -405,6 +403,7 @@ class FormItem(BaseModel):
         max_length = None
         max_length_error = None
         description = None
+        pattern = None
 
         content_types_map = {
             InputTagType.date: FormItemType.date,
@@ -445,6 +444,7 @@ class FormItem(BaseModel):
                 max_length = child.attrs.maxlength
                 max_length_error = child.attrs.maxlength_error
                 description = section.render(True, True)
+                pattern = child.attrs.pattern
 
                 # Ignore other <input> tags if exist
                 break
@@ -503,6 +503,7 @@ class FormItem(BaseModel):
             ),
             method=section.attrs.method,
             required=section.attrs.required,
+            pattern=pattern,
             status_exclude=section.attrs.status_exclude,
             status_prepend=section.attrs.status_prepend,
             url=section.attrs.url,

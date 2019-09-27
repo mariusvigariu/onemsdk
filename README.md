@@ -139,7 +139,7 @@ def handle_request_with_html(request):
     return response.json()
 ```
 
-ONEm SDK supports Jinja2 templates as HTML is not a good fit for dynamical content.
+ONEm SDK supports Jinja2 and Django template engines, as HTML is not a good fit for dynamic content.
 
 Setting a directory with static files is recommended when using HTML or Jinja2 files.
 After doing that, all the files can be referred relative to the static directory. The
@@ -211,4 +211,46 @@ def handle_request_with_template(request):
 
     # Jsonify the response and send it the over the wire
     return response.json()
+```
+
+
+### Using Django templates
+#### 1. Add the middleware, ideally last in your `settings.MIDDLEWARE` chain
+
+```python
+
+MIDDLEWARE = [
+    ...,
+    'onemsdk.contrib.django.HtmlToOnemResponseMiddleware',
+]
+```
+
+
+#### 2. Use Django templates with the ONEm supported tags.
+
+```python
+from django.views.generic import TemplateView
+
+class MyMenuView(TemplateView):
+    template_name = 'my_menu.html'
+
+    def get_context_data(self):
+        items = Item.objects.all()  # some items
+        return {'items': items}
+```
+
+```html
+<section>
+    <header>My Menu</header>
+    <ul>
+        {% for item in items %}
+            <li>
+                <a href="{{ item.get_absolute_url }}">
+                    {{ item.description }}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+    <footer>My Footer</footer>
+</section>
 ```

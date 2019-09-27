@@ -59,7 +59,7 @@ class TestModel(TestCase):
                     {
                         "type": "form-menu",
                         "name": "second-step",
-                        "description": "Separator 1 section 2\nOption 1 section 2\nOption 2 section 2\nSeparator 2 section 2",
+                        "description": None,
                         "header": "Header section 2",
                         "footer": "Footer section 2",
                         "body": [
@@ -117,10 +117,16 @@ class TestModel(TestCase):
                     {
                         "type": "form-menu",
                         "name": "third-step",
-                        "description": "Paragraph 1 section 3\nOption 1 section 3\nOption 2 section 3\nOption 3 section 3\nSeparator 1 section 3\nParagraph 2 section 3",
+                        "description": None,
                         "header": "Header section 3",
                         "footer": None,
                         "body": [
+                            {
+                                "type": "content",
+                                "description": "Paragraph 1 section 3",
+                                "value": None,
+                                "text_search": None,
+                            },
                             {
                                 "type": "option",
                                 "description": "Option 1 section 3",
@@ -144,6 +150,12 @@ class TestModel(TestCase):
                                 "description": "Separator 1 section 3",
                                 "value": None,
                                 "text_search": None,
+                            },
+                            {
+                                "type": "content",
+                                "description": "Paragraph 2 section 3",
+                                "value": None,
+                                "text_search": None
                             }
                         ],
                         "value": None,
@@ -184,7 +196,7 @@ class TestModel(TestCase):
                 }
             }
         }
-        self.assertEqual(json.dumps(expected), response.json())
+        self.assertEqual(json.dumps(expected, indent=2), response.json(indent=2))
 
     def test_response(self):
         html = """
@@ -410,10 +422,16 @@ class TestModel(TestCase):
                     {
                         "type": "form-menu",
                         "name": "step2",
-                        "description": "Choose your city:\nUK\nLondon\nManchester\nFR\nParis\nNice",
+                        "description": None,
                         "header": "SETUP CITY",
                         "footer": "Reply A-D",
                         "body": [
+                            {
+                                "type": "content",
+                                "description": "Choose your city:",
+                                "value": None,
+                                "text_search": None,
+                            },
                             {
                                 "type": "content",
                                 "description": "UK",
@@ -495,10 +513,12 @@ class TestModel(TestCase):
         html = """
             <form header="Form header" confirmation-needed method="PATCH" action="/route">
                 <section name="step1" numbered required auto-select>
-                   <ul>
-                       <li value="first" text-search="Context for first item">First item</li>
-                       <li value="second">Second item</li>
-                   </ul>
+                    <p></p>
+                    <ul>
+                        <li value="first" text-search="Context for first item">First item</li>
+                        <li value="second">Second item</li>
+                    </ul>
+                    <p></p>
                 </section>
                 <section name="step2" method="POST" confirmation-label="confirmation label" required>
                    <label>A question</label>
@@ -516,7 +536,7 @@ class TestModel(TestCase):
                     {
                         "type": "form-menu",
                         "name": "step1",
-                        "description": "First item\nSecond item",
+                        "description": None,
                         "header": None,
                         "footer": None,
                         "body": [

@@ -172,6 +172,7 @@ class FormItemType(str, Enum):
     email = 'email'  # the user should send a valid email address
     url = 'url'  # the user should send a valid url
     location = 'location'  # the user should send a valid location
+    regex = 'regex'  # validated against an ECMA script regex pattern
 
 
 class MenuItemFormItem(BaseModel):
@@ -337,6 +338,11 @@ class FormItem(BaseModel):
     required: bool = Schema(
         False,
         description='User can `SKIP` this `FormItem` if set to `false`'
+    )
+    pattern: str = Schema(
+        None,
+        description='ECMA Script regex pattern string'
+                    '<br> _applies only for `type=regex`_'
     )
     status_exclude: bool = Schema(
         False,

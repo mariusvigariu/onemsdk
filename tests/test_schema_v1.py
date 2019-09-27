@@ -48,6 +48,7 @@ class TestModel(TestCase):
                         },
                         "method": None,
                         "required": False,
+                        "pattern": None,
                         "status_exclude": False,
                         "status_prepend": False,
                         "url": None,
@@ -105,6 +106,7 @@ class TestModel(TestCase):
                         },
                         "method": None,
                         "required": False,
+                        "pattern": None,
                         "status_exclude": False,
                         "status_prepend": False,
                         "url": None,
@@ -162,6 +164,7 @@ class TestModel(TestCase):
                         },
                         "method": None,
                         "required": False,
+                        "pattern": None,
                         "status_exclude": False,
                         "status_prepend": False,
                         "url": None,
@@ -396,6 +399,7 @@ class TestModel(TestCase):
                         },
                         "method": None,
                         "required": True,
+                        "pattern": None,
                         "status_exclude": False,
                         "status_prepend": False,
                         "url": None,
@@ -465,6 +469,7 @@ class TestModel(TestCase):
                         },
                         "method": None,
                         "required": True,
+                        "pattern": None,
                         "status_exclude": False,
                         "status_prepend": False,
                         "url": None,
@@ -484,7 +489,7 @@ class TestModel(TestCase):
                 }
             }
         }
-        self.assertEqual(json.dumps(expected), response.json())
+        self.assertEqual(json.dumps(expected, indent=2), response.json(indent=2))
 
     def test_response_from_html_form(self):
         html = """
@@ -546,6 +551,7 @@ class TestModel(TestCase):
                         },
                         "method": None,
                         "required": True,
+                        "pattern": None,
                         "status_exclude": False,
                         "status_prepend": False,
                         "url": None,
@@ -578,6 +584,7 @@ class TestModel(TestCase):
                         },
                         "method": "POST",
                         "required": True,
+                        "pattern": None,
                         "status_exclude": False,
                         "status_prepend": False,
                         "url": None,
@@ -700,6 +707,7 @@ class TestFormItem(TestCase):
             },
             "method": "PATCH",
             "required": True,
+            "pattern": None,
             "status_exclude": True,
             "status_prepend": False,
             "url": "https://url.url",
@@ -707,4 +715,4 @@ class TestFormItem(TestCase):
             "validate_type_error_footer": "The val type err footer",
             "validate_url": "The val url"
         }
-        self.assertEqual(json.dumps(expected), form_item.json())
+        self.assertEqual(json.dumps(expected, indent=2), form_item.json(indent=2))

@@ -531,21 +531,11 @@ class FormMeta(BaseModel):
                     'Defaults to `false`, which means it will be shown below '
                     'header if the completion status is shown'
     )
-    confirmation_needed: bool = Schema(
-        True,
-        title='Confirmation needed',
-        description='If `false` will not ask for confirmation. Defaults to `true`'
+    skip_confirmation: bool = Schema(
+        False,
+        title='Skip confirmation',
+        description='If `true` will not ask for confirmation. Defaults to `false`'
     )
-
-    def __init__(self,
-                 completion_status_show: bool = False,
-                 completion_status_in_header: bool = False,
-                 confirmation_needed: bool = True):
-        super(FormMeta, self).__init__(
-            completion_status_in_header=completion_status_in_header,
-            completion_status_show=completion_status_show,
-            confirmation_needed=confirmation_needed
-        )
 
 
 FormMeta.update_forward_refs()
@@ -567,7 +557,10 @@ class Form(BaseModel):
         description='HTTP method indicating how to trigger the callback path. '
                     'Defaults to `"POST"`'
     )
-    path: str = Schema(..., description='The callback path used to send the serialized form data')
+    path: str = Schema(
+        ...,
+        description='The callback path used to send the serialized form data'
+    )
     header: str = Schema(
         None,
         description='The header of the form. It can be overwritten by each body component'
@@ -576,7 +569,10 @@ class Form(BaseModel):
         None,
         description='The footer of the form. It can be overwritten by each body component'
     )
-    meta: FormMeta = Schema(None, description='[`FormMeta`](#formmeta) object. Contains configuration flags')
+    meta: FormMeta = Schema(
+        None,
+        description='[`FormMeta`](#formmeta) object. Contains configuration flags'
+    )
 
     @classmethod
     def from_tag(cls, form_tag: FormTag) -> 'Form':
@@ -590,7 +586,7 @@ class Form(BaseModel):
             meta=FormMeta(
                 completion_status_show=form_tag.attrs.completion_status_show,
                 completion_status_in_header=form_tag.attrs.completion_status_in_header,
-                confirmation_needed=form_tag.attrs.confirmation_needed
+                skip_confirmation=form_tag.attrs.skip_confirmation
             ),
             method=form_tag.attrs.method,
             path=form_tag.attrs.action,

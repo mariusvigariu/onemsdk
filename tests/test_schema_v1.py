@@ -192,7 +192,7 @@ class TestModel(TestCase):
                 "meta": {
                     "completion_status_show": False,
                     "completion_status_in_header": False,
-                    "confirmation_needed": False
+                    "skip_confirmation": False
                 }
             }
         }
@@ -503,7 +503,7 @@ class TestModel(TestCase):
                 "meta": {
                     "completion_status_show": False,
                     "completion_status_in_header": True,
-                    "confirmation_needed": False
+                    "skip_confirmation": False
                 }
             }
         }
@@ -511,7 +511,7 @@ class TestModel(TestCase):
 
     def test_response_from_html_form(self):
         html = """
-            <form header="Form header" confirmation-needed method="PATCH" action="/route">
+            <form header="Form header" skip-confirmation method="PATCH" action="/route">
                 <section name="step1" numbered required auto-select>
                     <p></p>
                     <ul>
@@ -620,7 +620,7 @@ class TestModel(TestCase):
                 "meta": {
                     "completion_status_show": False,
                     "completion_status_in_header": False,
-                    "confirmation_needed": True
+                    "skip_confirmation": True
                 }
             }
         }

@@ -415,7 +415,7 @@ class FormTagAttrs(BaseModel):
 
     completion_status_show: bool = False
     completion_status_in_header: bool = False
-    confirmation_needed: bool = True
+    skip_confirmation: bool = False
 
 
 class FormTag(Tag):
@@ -447,7 +447,7 @@ class FormTag(Tag):
             method=node.attrs.get('method') or 'POST',
             completion_status_show='completion-status-show' in node.attrs,
             completion_status_in_header='completion-status-in-header' in node.attrs,
-            confirmation_needed='confirmation-needed' in node.attrs,
+            skip_confirmation='skip-confirmation' in node.attrs,
         )
 
     def render(self):

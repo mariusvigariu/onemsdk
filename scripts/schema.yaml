@@ -324,10 +324,10 @@ components:
             status is shown
           default: false
           type: boolean
-        confirmation_needed:
-          title: Confirmation needed
-          description: If `false` will not ask for confirmation. Defaults to `true`
-          default: true
+        skip_confirmation:
+          title: Skip confirmation
+          description: If `true` will not ask for confirmation. Defaults to `false`
+          default: false
           type: boolean
     Form:
       title: Form

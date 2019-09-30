@@ -522,7 +522,9 @@ class TestModel(TestCase):
                 </section>
                 <section name="step2" method="POST" confirmation-label="confirmation label" required>
                    <label>A question</label>
-                   <input type="number" step="1" pattern="[1-2]*" />
+                   <input type="number" step="1" />
+                   <p></p>
+                   <input type="location" />
                 </section>
             </form>
         """
@@ -604,7 +606,7 @@ class TestModel(TestCase):
                         },
                         "method": "POST",
                         "required": True,
-                        "pattern": "[1-2]*",
+                        "pattern": None,
                         "status_exclude": False,
                         "status_prepend": False,
                         "url": None,
@@ -704,7 +706,7 @@ class TestFormItem(TestCase):
         section_tag = load_html(html_str=html)
         form_item = FormItem.from_tag(section_tag)
         expected = {
-            "type": "email",
+            "type": "regex",
             "name": "first-step",
             "description": "",
             "header": "The header",

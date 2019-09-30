@@ -172,6 +172,7 @@ class FormItemType(str, Enum):
     email = 'email'  # the user should send a valid email address
     url = 'url'  # the user should send a valid url
     location = 'location'  # the user should send a valid location
+    regex = 'regex'  # validated against an ECMA script regex pattern
 
 
 class MenuItemFormItem(BaseModel):
@@ -340,7 +341,8 @@ class FormItem(BaseModel):
     )
     pattern: str = Schema(
         None,
-        description='ECMA Script regex pattern string'
+        description='ECMA Script regex pattern string '
+                    '<br> _applies only for `type=regex`_'
     )
     status_exclude: bool = Schema(
         False,
@@ -379,7 +381,7 @@ class FormItem(BaseModel):
             if self.type != FormItemType.form_menu:
                 raise ONEmSDKException(
                     f'When "body" param is filled, the type of the '
-                    f'FormItem must be {FormItemType.form_menu}'
+                    f'FormItem must be {FormItemType.form_menu}.'
                 )
         if self.body is None:
             if self.type == FormItemType.form_menu:
@@ -387,9 +389,22 @@ class FormItem(BaseModel):
                     f'When type of FormItem is {FormItemType.form_menu}, '
                     f'"body" param must be filled.'
                 )
+        if self.pattern is not None:
+            if self.type != FormItemType.regex:
+                raise ONEmSDKException(
+                    f'When "pattern" param is filled, the type of the '
+                    f'FormItem must be {FormItemType.regex}.'
+                )
+        if self.pattern is None:
+            if self.type == FormItemType.regex:
+                raise ONEmSDKException(
+                    f'When type of FormItem is {FormItemType.regex}, '
+                    f'"pattern" param must be filled.'
+                )
 
     @classmethod
     def from_tag(cls, section: SectionTag) -> 'FormItem':
+        type = None
         header = None
         footer = None
         body = []
@@ -423,17 +438,23 @@ class FormItem(BaseModel):
                 # If the input type is "number", determine if it's "int" or "float"
                 if input_type == InputTagType.number:
                     if child.attrs.step == 1:
-                        content_types_map[InputTagType.number] = FormItemType.int
+                        type = FormItemType.int
                     else:
-                        content_types_map[InputTagType.number] = FormItemType.float
-
-                # Check if hidden input declares attribute "value"
-                if input_type == InputTagType.hidden:
+                        type = FormItemType.float
+                elif input_type == InputTagType.hidden:
                     value = child.attrs.value
                     if value is None:
                         raise ONEmSDKException(
                             'value attribute is required for input type="hidden"'
                         )
+
+                is_regex_type = child.attrs.pattern is not None
+                if is_regex_type:
+                    # Override type with 'regex' if pattern is declared
+                    type = FormItemType.regex
+
+                if type is None:
+                    type = content_types_map[input_type]
 
                 min_value = child.attrs.min
                 min_value_error = child.attrs.min_error
@@ -449,9 +470,8 @@ class FormItem(BaseModel):
                 # Ignore other <input> tags if exist
                 break
             if isinstance(child, UlTag):
-                # Hack with an invalid input type to avoid KeyError
-                input_type = 'option'
-                content_types_map[input_type] = FormItemType.form_menu
+                type = FormItemType.form_menu
+
                 for child2 in section.children:
                     if isinstance(child2, UlTag):
                         for li in child.children:
@@ -479,7 +499,7 @@ class FormItem(BaseModel):
             footer = section.children[-1].render()
 
         return FormItem(
-            type=content_types_map[input_type],
+            type=type,
             name=section.attrs.name,
             description=description,
             header=header or section.attrs.header,

@@ -523,6 +523,8 @@ class TestModel(TestCase):
                 <section name="step2" method="POST" confirmation-label="confirmation label" required>
                    <label>A question</label>
                    <input type="number" step="1" />
+                   <p></p>
+                   <input type="location" />
                 </section>
             </form>
         """
@@ -694,6 +696,7 @@ class TestFormItem(TestCase):
                  numbered
                  required>
             <input type="email"
+                   pattern="somepattern"
                    minlength="3"
                    minlength-error="The minlen error"
                    maxlength="100"
@@ -703,7 +706,7 @@ class TestFormItem(TestCase):
         section_tag = load_html(html_str=html)
         form_item = FormItem.from_tag(section_tag)
         expected = {
-            "type": "email",
+            "type": "regex",
             "name": "first-step",
             "description": "",
             "header": "The header",
@@ -727,7 +730,7 @@ class TestFormItem(TestCase):
             },
             "method": "PATCH",
             "required": True,
-            "pattern": None,
+            "pattern": "somepattern",
             "status_exclude": True,
             "status_prepend": False,
             "url": "https://url.url",

@@ -3,11 +3,13 @@
 - JSON Schema & Python API:
     - make `FormItem.description` optional
     - Rename `FormItem.confirmation_needed` to `FormItem.skip_confirmation`, which says the opposite and defaults to `false`
+    - Add `FormItem.pattern` attribute
+    - Add `FormItemType.regex` (used only with not null `FormItem.pattern`)
  - HTML API:
     - Rename `<form>`'s attribute `confirmation-needed` to `skip-confirmation`, which defaults to `false`
+    - Support new `<input>` standard attribute: `pattern`
 - Bug fixes:
-    - `FormItem`s of type "form-menu" were having the options
-    duplicated in description
+    - `FormItem`s of type "form-menu" were having the options duplicated in description
 
 ---
 ## 0.7.0

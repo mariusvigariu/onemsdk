@@ -115,6 +115,7 @@ class InputTagAttrs(BaseModel):
     maxlength: int = None
     step: int = None
     value: str = None  # only for type="hidden"
+    pattern: str = None
 
     # not standard
     min_error: str = None
@@ -145,7 +146,8 @@ class InputTag(Tag):
             maxlength=node.attrs.get('maxlength'),
             maxlength_error=node.attrs.get('maxlength-error'),
             step=node.attrs.get('step'),
-            value=node.attrs.get('value')
+            value=node.attrs.get('value'),
+            pattern=node.attrs.get('pattern'),
         )
 
     def render(self):

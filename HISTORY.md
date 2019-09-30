@@ -1,5 +1,7 @@
 # History
 
+---
+## 0.8.0
 - JSON Schema & Python API:
     - make `FormItem.description` optional
     - Rename `FormItem.confirmation_needed` to `FormItem.skip_confirmation`, which says the opposite and defaults to `false`

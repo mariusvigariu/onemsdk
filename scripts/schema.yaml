@@ -178,6 +178,7 @@ components:
           - email
           - url
           - location
+          - regex
           type: string
         name:
           title: Name
@@ -273,7 +274,7 @@ components:
           type: boolean
         pattern:
           title: Pattern
-          description: ECMA Script regex pattern string
+          description: ECMA Script regex pattern string <br> _applies only for `type=regex`_
           type: string
         status_exclude:
           title: Status_Exclude

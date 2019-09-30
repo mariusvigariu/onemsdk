@@ -173,7 +173,7 @@ class FormItemType(str, Enum):
     email = 'email'  # the user should send a valid email address
     url = 'url'  # the user should send a valid url
     location = 'location'  # the user should send a valid location
-    regex = 'regex'  # validated against an ECMA script regex pattern
+    regex_ = 'regex'  # validated against an ECMA script regex pattern
 
 
 class MenuItemFormItem(BaseModel):
@@ -392,15 +392,15 @@ class FormItem(BaseModel):
                     f'"body" param must be filled.'
                 )
         if self.pattern is not None:
-            if self.type != FormItemType.regex:
+            if self.type != FormItemType.regex_:
                 raise ONEmSDKException(
                     f'When "pattern" param is filled, the type of the '
-                    f'FormItem must be {FormItemType.regex}.'
+                    f'FormItem must be {FormItemType.regex_}.'
                 )
         if self.pattern is None:
-            if self.type == FormItemType.regex:
+            if self.type == FormItemType.regex_:
                 raise ONEmSDKException(
-                    f'When type of FormItem is {FormItemType.regex}, '
+                    f'When type of FormItem is {FormItemType.regex_}, '
                     f'"pattern" param must be filled.'
                 )
 
@@ -453,7 +453,7 @@ class FormItem(BaseModel):
                 is_regex_type = child.attrs.pattern is not None
                 if is_regex_type:
                     # Override type with 'regex' if pattern is declared
-                    type_ = FormItemType.regex
+                    type_ = FormItemType.regex_
 
                 if type_ is None:
                     type_ = content_types_map[input_type]

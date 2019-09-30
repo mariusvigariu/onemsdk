@@ -59,11 +59,11 @@ class MenuItem(BaseModel):
     def __init__(self, description: str, text_search: str = None,
                  method: HttpMethod = None, path: str = None):
         if path:
-            type = MenuItemType.option
+            type_ = MenuItemType.option
             method = method or HttpMethod.GET
         else:
-            type = MenuItemType.content
-        super(MenuItem, self).__init__(type=type, description=description,
+            type_ = MenuItemType.content
+        super(MenuItem, self).__init__(type=type_, description=description,
                                        text_search=text_search, method=method, path=path)
 
     @classmethod
@@ -80,11 +80,12 @@ class MenuItem(BaseModel):
         path = None
         text_search = None
 
-        if isinstance(tag, LiTag) and isinstance(tag.children[0], ATag):
-            atag: ATag = tag.children[0]
-            method = atag.attrs.method
-            path = atag.attrs.href
-            text_search = tag.attrs.text_search
+        if isinstance(tag, LiTag):
+            child = tag.children[0]
+            if isinstance(child, ATag):
+                method = child.attrs.method
+                path = child.attrs.href
+                text_search = tag.attrs.text_search
 
         return MenuItem(description=description, text_search=text_search, method=method,
                         path=path)
@@ -201,11 +202,11 @@ class MenuItemFormItem(BaseModel):
 
     def __init__(self, description: str, value: str = None, text_search: str = None):
         if value:
-            type = MenuItemType.option
+            type_ = MenuItemType.option
         else:
-            type = MenuItemType.content
+            type_ = MenuItemType.content
         super(MenuItemFormItem, self).__init__(
-            type=type, description=description, value=value, text_search=text_search
+            type=type_, description=description, value=value, text_search=text_search
         )
 
     @classmethod
@@ -372,7 +373,8 @@ class FormItem(BaseModel):
         description='The callback url path `"GET"` triggered to validate user input. '
                     '<br> A query string is sent by ONEm: `?form_item_name=user_input` '
                     '<br> The validate_url must return a json response: '
-                    '`{"valid": true/false, "error": "Some message in case of validation errors"}`'
+                    '`{"valid": true/false, "error": "Some message in case of '
+                    'validation errors"}`'
     )
 
     def __init__(self, **data):
@@ -404,7 +406,7 @@ class FormItem(BaseModel):
 
     @classmethod
     def from_tag(cls, section: SectionTag) -> 'FormItem':
-        type = None
+        type_ = None
         header = None
         footer = None
         body = []
@@ -438,9 +440,9 @@ class FormItem(BaseModel):
                 # If the input type is "number", determine if it's "int" or "float"
                 if input_type == InputTagType.number:
                     if child.attrs.step == 1:
-                        type = FormItemType.int
+                        type_ = FormItemType.int
                     else:
-                        type = FormItemType.float
+                        type_ = FormItemType.float
                 elif input_type == InputTagType.hidden:
                     value = child.attrs.value
                     if value is None:
@@ -451,10 +453,10 @@ class FormItem(BaseModel):
                 is_regex_type = child.attrs.pattern is not None
                 if is_regex_type:
                     # Override type with 'regex' if pattern is declared
-                    type = FormItemType.regex
+                    type_ = FormItemType.regex
 
-                if type is None:
-                    type = content_types_map[input_type]
+                if type_ is None:
+                    type_ = content_types_map[input_type]
 
                 min_value = child.attrs.min
                 min_value_error = child.attrs.min_error
@@ -470,7 +472,7 @@ class FormItem(BaseModel):
                 # Ignore other <input> tags if exist
                 break
             if isinstance(child, UlTag):
-                type = FormItemType.form_menu
+                type_ = FormItemType.form_menu
 
                 for child2 in section.children:
                     if isinstance(child2, UlTag):
@@ -499,7 +501,7 @@ class FormItem(BaseModel):
             footer = section.children[-1].render()
 
         return FormItem(
-            type=type,
+            type=type_,
             name=section.attrs.name,
             description=description,
             header=header or section.attrs.header,
@@ -567,11 +569,13 @@ class Form(BaseModel):
     A top level component used to acquire information from the user
     """
     type: str = Schema('form',
-                       description='Indicates the type of the object, defaults to `"form"`',
+                       description='Indicates the type of the object, defaults '
+                                   'to `"form"`',
                        const=True)
     body: List[FormItem] = Schema(
         ...,
-        description='Sequence of [`FormItem`](#formitem) objects used to acquire information from user'
+        description='Sequence of [`FormItem`](#formitem) objects used to acquire '
+                    'information from user'
     )
     method: HttpMethod = Schema(
         HttpMethod.POST,

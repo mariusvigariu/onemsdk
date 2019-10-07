@@ -373,8 +373,9 @@ class FormItem(BaseModel):
         description='The callback url path `"GET"` triggered to validate user input. '
                     '<br> A query string is sent by ONEm: `?form_item_name=user_input` '
                     '<br> The validate_url must return a json response: '
-                    '`{"valid": true/false, "error": "Some message in case of '
+                    '`{"valid": true/false, "message": "Some message in case of '
                     'validation errors"}`'
+                    '<br/> "message" is required only if `valid` is `false`'
     )
 
     def __init__(self, **data):

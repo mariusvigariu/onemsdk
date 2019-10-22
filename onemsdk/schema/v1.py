@@ -340,6 +340,10 @@ class FormItem(BaseModel):
         False,
         description='User can `SKIP` this `FormItem` if set to `false`'
     )
+    default: str = Schema(
+        None,
+        description='A default value in case of non required form items'
+    )
     pattern: str = Schema(
         None,
         description='ECMA Script regex pattern string '
